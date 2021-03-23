@@ -213,6 +213,7 @@ c and only Boltzmann factors for MURCA.
 c**********************************************************************
 
       implicit real*8 (a-h,k-z)
+
       INCLUDE 'size.inc.f'
       INCLUDE 'rho_limits.inc.f'
       parameter (pi = 3.14159265d0)
@@ -222,6 +223,7 @@ c**********************************************************************
       INCLUDE 'pairing.inc.f'
       INCLUDE 'fermi.inc.f'
       INCLUDE 'control_nu.inc.f'
+      
 c      common/h_tables/h_bfield,h_temp,h_pfermi,h_emissivity
 
 c ***************************
@@ -292,22 +294,48 @@ c      Bfie=4.41d13*GtoG2
 c      invfm2GeV=1.973d-1
 c      Bfield_G = 2.0d13
 c      gamm = 0d-9
-      
-      Temp_keV = t * K2keV
-      pFermi_GeV = kfm(i) * fmG
-      if ((Temp_keV>1).and.(Temp_keV<900)
-     & .and.(pFermi_GeV>1d-3).and.(pFermi_GeV<3d-1)) then
-       qasync = gamm*gamm*emissivity(Bfield_G, Temp_keV, pFermi_GeV)
-c       write(6,*)gamm,Bfield_G,Temp_keV,pFermi_GeV,qasync
-      else
-       qasync=0d0
-      end if
-      if (gamm < 0) then
-       qasync = -qasync
-      end if
+     
 
-c **** effect of superfluidity :
+c *************************** set couplings
+       gann = 1d-10
+       gapp = 1d-10
 
+
+       g_c = gapp + gann
+       h_c = gapp - gann
+
+c *************************** _compute_nucleon_star_factors
+c all in GeV
+       m_pi = 0.140d0
+       star_kfn_core = kfn(i) * fmG
+       star_kfp_core = kfp(i) * fmG
+
+       m_x = m_pi / (2.d0*star_kfn_core) 
+       m_y = m_pi / (2.d0*star_kfp_core) 
+       xyp = 2.d0 * m_x * m_y /(m_x+m_y)
+       xym = 2.d0 * m_x * m_y /(m_x-m_y)
+
+       Fx    = 1.d0 - 3.d0/2.d0 * m_x * atan(1.d0/m_x) +
+     &        m_x**2.d0 / 2.d0 / (1.d0+x**2)
+       Fy    = 1.d0 - 3.d0/2.d0 * m_y * atan(1.d0/m_y) +
+     &        m_y**2.d0 / 2.d0 / (1.d0+y**2)
+       Fxyp  = 1.d0 - 3.d0/2.d0 * xyp * atan(1.d0/xyp) +
+     &        m_y**2.d0 / 2.d0 / (1.d0+xyp**2)
+       Fxym  = 1.d0 - 3.d0/2.d0 * xym * atan(1.d0/xym) +
+     &        m_y**2.d0 / 2.d0 / (1.d0+xym**2)
+
+       eann_star_factor = (star_kfn_core/0.337d0) * Fx/0.607211d0
+       eapp_star_factor = (star_kfp_core/0.337d0) * Fy/0.607211d0
+                
+       gfacg = 0.5d-1*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+     &     + (1.d0-m_y*atan(1.d0/m_y))
+       gfach = 0.5d-1*Fy+0.5d-1*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+     &     + (1.d0- m_y*atan(1.d0/m_y))
+
+      eanp_star_factor_g = (star_kfn_core/0.337d0) * gfacg
+      eanp_star_factor_h = (star_kfn_core/0.337d0) * gfach
+
+c *************************** superfluidity
       if(t .lt. tcn(i))then
        if (i.ge.isf) then
         tt=t/tcn(i)
@@ -343,6 +371,66 @@ c **** effect of superfluidity :
       rbrem_nn=min(rbrem_nn_p,rbrem_nn_n)
       rbrem_np=min(rbrem_np_p,rbrem_np_n)
       rbrem_pp=min(rbrem_pp_p,rbrem_pp_n)
+ 
+c *************************** PBF
+
+c 1s0 p
+      if(t .lt. tcp(i))then
+       tau = t/tcp(i)
+       Delta_T_s_p = t * sqrt( 1.d0 - tau ) * ( 1.456d0 
+     &               - 0.157d0/sqrt(tau) + 1.764/tau ) 
+       zn = Delta_T_s_p / t
+       Ias_p = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
+     &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
+     &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
+       PBF_s_p_epsilon = 7.01d14 * (gapp/1d-10)**2d0
+     &                   * PBF_s_p_star_factor * (t/3d8)**5d0
+     &                   * (1d0/mstp(i))**2d0 * (Ias_p/2.2d2)
+      else
+       PBF_s_p_epsilon = 0d0
+      endif
+
+
+
+c *************************** _do_nucelon
+c in erg/cm^3/s
+      qabrem_nn = 1.827e12 * eann_star_factor * (t/1.d8)**6d0
+     &            * (gann/1d-10)**2d0 * mstn(i)**2d0
+      qabrem_pp = 1.827e12 * eapp_star_factor * (t/1.d8)**6d0
+     &            * (gapp/1d-10)**2d0 * mstp(i)**2d0
+      qabrem_np = 2.008d12 * (eanp_star_factor_h * h_c**2d0 
+     &            + eanp_star_factor_g * g_c**2d0 )/(1d-10)**2d0
+     &            * (t/1.d8)**6d0 * mstn(i)**2d0 
+
+      qabrem_nn_super = qabrem_nn * rbrem_nn
+      qabrem_pp_super = qabrem_pp * rbrem_np
+      qabrem_np_super = qabrem_np * rbrem_pp
+
+
+
+c *************************** synchotron
+ 
+      Temp_keV = t * K2keV
+      pFermi_GeV = kfm(i) * fmG
+      if ((Temp_keV>1).and.(Temp_keV<900)
+     & .and.(pFermi_GeV>1d-3).and.(pFermi_GeV<3d-1)) then
+       qasync = gamm*gamm*emissivity(Bfield_G, Temp_keV, pFermi_GeV)
+       write(6,*)gamm,Bfield_G,Temp_keV,pFermi_GeV,qasync
+      else
+       qasync=0d0
+      end if
+      if (gamm < 0) then
+       qasync = -qasync
+      end if
+
+
+
+
+
+
+
+c **** effect of superfluidity :
+
       qbrem_nn=rbrem_nn*qbrem_nn
       qbrem_np=rbrem_np*qbrem_np
       qbrem_pp=rbrem_pp*qbrem_pp
