@@ -1,0 +1,8 @@
+1.6d14   6.2d11   1.d7    1.d08		:  rhocore  rhodrip  rhoenv  rhosurf
+401  200     	     	 	 		:  icore    idec
+
+Note: idec is the number of zone per decade of density in the crust, as used by 
+      subroutine grid  (in "precool.f")
+      Since Temp is calculated on even zones, i.e., every wo zones only,
+      idec should be at least 10
+      For the same reason, icore should be at least 100.

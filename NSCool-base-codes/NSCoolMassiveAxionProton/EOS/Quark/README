@@ -1,0 +1,9 @@
+Strange matter EOS from the program `strange_eos.f'
+
+File names:
+
+strange_eos_03_140_150.dat     03 alpha_c = 0.3
+                              140 B^1/4   = 140 MeV
+                              150 m_s     = 150 MeV
+
+In all cases the renormalization point is at 313 MeV

@@ -1,0 +1,18 @@
+HEAT TRANSPORT CONTROL:-----------------------------------
+0	IOPACITY
+1       ICON_CRUST
+2       ICON_CORE
+0       ICONNOTHING2      ! Not used so far
+0       ICONNOTHING3      ! Not used so far
+0       ICONNOTHING4      ! Not used so far
+0       ICONNOTHING5      ! Not used so far
+0.0     CONNOTHING1       ! Not used so far
+0.0     CONNOTHING2       ! Not used so far
+1e-10   QIMP
+0.0     CONNOTHING4       ! Not used so far
+0.0     CONNOTHING5       ! Not used so far
+
+
+
+
+

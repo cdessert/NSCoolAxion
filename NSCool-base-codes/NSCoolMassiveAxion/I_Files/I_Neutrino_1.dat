@@ -1,0 +1,28 @@
+NEUTRINO EMISSION CONTROL:--------------------------------
+0.0	MURCA_INCREASE
+1	INU_DURCA	: controls ALL Direct Urca processes
+1	INU_EION
+1	INU_PLASMA
+0	INU_SYNCH
+1	INU_N1S0_BPF
+1	INU_N3P2_PBF
+1	INU_P_PBF
+0	INU_BUBBLE
+0	INU_PHOTO
+0	INU_PAIR
+0	INU_nuts1       : not used so far
+0	INU_nuts2       : not used so far
+0	INU_nuts3       : not used so far
+0	INU_nuts4       : not used so far
+0	INU_nuts5       : not used so far
+ENHANCED NEUTRINO EMISSION CONTROL:-----------------------
+1.2e25		RHOEXO
+1.e25		CEXO
+6		PEXO
+0		PEXOSN
+0		PEXOSP
+0		NONOTHING1    : not used so far
+0		NONOTHING2    : not used so far
+0		NONOTHING3    : not used so far
+0		NONOTHING4    : not used so far
+

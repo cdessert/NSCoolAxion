@@ -1,0 +1,13 @@
+MAGNETIC FIELD:-------------------------------------------
+0	IFIELD  (0: no B evol., 1: B at t_n-1, 2: B exact)
+1       I_GR_FIELD (0: no Gr effects, 1: WITH GR effects)
+1.e13	BFIELD0
+113	i_0     (Rho_0=1.6e14)
+289	i_1	(Rho_1=1.0e14): not used
+0.1	Q_imp
+0.0	start_b_diffusion (time, in years)
+0	I_JOULE_HEAT
+0	I_CONB
+0	I_ELECONB
+
+

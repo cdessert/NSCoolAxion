@@ -1,0 +1,13 @@
+ACCRETION RATE CONTROL:-----------------------------------
+0       	i_acc    1=FREDs 2=STEPs
+0.0  		m_dot0   m_dot_max
+0.0	        t_acc0   Onset of accretion in years
+0.0             t_acc1   Burst recurrence time in years
+0.0             t_acc2   Burst time-scale in years
+0.0      	alpha_acc !power law index for the decay
+0.0             t_step_min  Minimal time step (years) at beginning and end of accretion
+0.0             eta_Edd : fraction of acretied mass going into X-ray luminosity
+0.0             X_Edd   : H mass fracion of accreted matter
+
+year = 3.1557600d7 seconds
+

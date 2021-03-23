@@ -1,0 +1,2 @@
+grep 'i_cycle_extra' NSCool.f NSCool_READ.inc.f NSCool_OPEN.inc.f NSCool_PRINT.inc.f NSCool_INIT_TPROF.inc.f precool.f conductivity.f conductivity_core.f conductivity_crust.f opacity.f neutrino.f neutrino_core.f neutrino_crust.f heating.f spec_heat.f density.f boundary.f tc.f eff_mass.f rotation.f accretion.f magnetic.f Tools.f
+
