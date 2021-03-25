@@ -38,6 +38,7 @@ c *********************************************************************
       parameter (pi=3.1415926535d0)
 
       INCLUDE 'size.inc.f'
+      INCLUDE 'pid.inc.f'
       INCLUDE 'rho_limits.inc.f'
       INCLUDE 'gamma_limits.inc.f'
       INCLUDE 'files.inc.f'
@@ -163,31 +164,102 @@ c Muon cube
 c      real*8 :: test_emissivity
 c      real*8 :: test_Bfield, test_Temp, test_pfermi
 
-      open(21,file='Bfield.txt')
-      open(22,file='Temp.txt')
-      open(23,file='pFermi.txt')
-      open(24,file='Emissivity.txt')
-      do h_i = 1,h_dimb
-         do h_j = 1,h_dimp
-            do h_k = 1,h_dimt
-               read(21,*) h_bfield(h_i,h_j,h_k)
-               read(22,*) h_temp(h_i,h_j,h_k)
-               read(23,*) h_pfermi(h_i,h_j,h_k)
-               read(24,*) h_emissiv(h_i,h_j,h_k)
-            end do
-         end do
-      end do
-      close(21)
-      close(22)
-      close(23)
-      close(24)
 
-      h_b0 = log10(h_bfield(1,1,1))
-      h_b1 = log10(h_bfield(h_dimb,1,1))
-      h_t0 = log10(h_temp(1,1,1))
-      h_t1 = log10(h_temp(1,1,h_dimt))
-      h_p0 = log10(h_pfermi(1,1,1))
-      h_p1 = log10(h_pfermi(1,h_dimp,1))
+c PBF I
+      integer :: p_I
+      integer,parameter :: p_dimI = 1000
+      real*8,dimension(1:p_dimI) :: IA_x
+      real*8,dimension(1:p_dimI) :: IA_y
+      real*8,dimension(1:p_dimI) :: IB_x
+      real*8,dimension(1:p_dimI) :: IB_y
+      common/PBF_I/IA_x,IA_y,IB_x,IB_y
+
+
+c Process switch
+      character(len=64) :: arg
+      integer :: ProcessID
+
+
+      call getarg(1,arg)
+      read (arg,'(I64)') ProcessID
+      write(*,*) 'ID:',ProcessID
+
+      write(*,*) 'The following axion processes will be switched on:'
+      if (ProcessID.eq.0) then
+       write(*,*) 'None'
+      endif
+      if (IAND(pid_synchotron,ProcessID).gt.0) then
+       write(*,*) 'synchotron'
+      endif
+      if (IAND(pid_nn,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung nn'
+      endif
+      if (IAND(pid_pp,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung pp'
+      endif
+      if (IAND(pid_np,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung np'
+      endif
+      if (IAND(pid_nn_super,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung nn with superfluidity suppression'
+      endif
+      if (IAND(pid_pp_super,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung pp with superfluidity suppression'
+      endif
+      if (IAND(pid_np_super,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung np with superfluidity suppression'
+      endif
+      if (IAND(pid_PBF_s_p,ProcessID).gt.0) then
+       write(*,*) 'PBF 1s0 p'
+      endif
+      if (IAND(pid_PBF_s_n,ProcessID).gt.0) then
+       write(*,*) 'PBF 1s0 n'
+      endif
+       if (IAND(pid_PBF_pA,ProcessID).gt.0) then
+       write(*,*) 'PBF 3p2 A'
+      endif
+       if (IAND(pid_PBF_pB,ProcessID).gt.0) then
+       write(*,*) 'PBF 3p2 B'
+      endif
+      write(*,*) '-------------------------------'
+
+
+      open(25,file='IpnA.txt')
+      open(26,file='IpnB.txt')
+      do p_I = 1,p_dimI
+       read(25,*) IA_x(p_I)
+       read(25,*) IA_y(p_I)
+       read(26,*) IB_x(p_I)
+       read(26,*) IB_y(p_I)
+      end do
+      close(25)
+      close(25)
+
+c      open(21,file='Bfield.txt')
+c      open(22,file='Temp.txt')
+c      open(23,file='pFermi.txt')
+c      open(24,file='Emissivity.txt')
+c      do h_i = 1,h_dimb
+c         do h_j = 1,h_dimp
+c            do h_k = 1,h_dimt
+c               read(21,*) h_bfield(h_i,h_j,h_k)
+c               read(22,*) h_temp(h_i,h_j,h_k)
+c               read(23,*) h_pfermi(h_i,h_j,h_k)
+c               read(24,*) h_emissiv(h_i,h_j,h_k)
+c            end do
+c         end do
+c      end do
+c      close(21)
+c      close(22)
+c      close(23)
+c      close(24)
+
+c      h_b0 = log10(h_bfield(1,1,1))
+c      h_b1 = log10(h_bfield(h_dimb,1,1))
+c      h_t0 = log10(h_temp(1,1,1))
+c      h_t1 = log10(h_temp(1,1,h_dimt))
+c      h_p0 = log10(h_pfermi(1,1,1))
+c      h_p1 = log10(h_pfermi(1,h_dimp,1))
 
       
 c      write(6,*)'1',h_dim,h_bfield,h_temp,h_pfermi,h_emissiv
@@ -254,7 +326,7 @@ c       read(5,*)filename
 c ***  Can add here the directory where "Cool_*.in" is:
 c       filename='Model_1/'//filename
 c ***  Or define it completely here: **********************************
-       filename='Model_1/Cool_Try.in'
+       filename='Model_1_'//trim(arg)//'/Cool_Try.in'
        write(6,*)'Using as input: ',filename
 c**********************************************************************
        open(unit=15,file=filename,status='old')
@@ -291,6 +363,12 @@ c *** OUTPUT FILES: ***************************************************
       read(15,*,end=9997,err=9997)f_Teff
       read(15,*,end=9997,err=9997)f_Temp
       read(15,*,end=9997,err=9997)f_Star
+
+      f_i    = 'Model_1_'//trim(arg)//'/'//f_i
+      f_Teff = 'Model_1_'//trim(arg)//'/'//f_Teff
+      f_Temp = 'Model_1_'//trim(arg)//'/'//f_Temp
+      f_Star = 'Model_1_'//trim(arg)//'/'//f_Star
+
 c**********************************************************************
 c *** PRINT ON THE SCREEN THE FILES:
 c Notice: pscreen will be read from file "I.dat"
@@ -613,7 +691,7 @@ c *********************************************************************
        a=a_cell(i)
        a1=a_ion(i)
        z=z_ion(i)
-       call neutrino(i,t,time,d,a,z,qnu(i),
+       call neutrino(i,t,ProcessID,time,d,a,z,qnu(i),
      1   qeebrem(i),qnpb(i),qplasma(i),qsynch(i),qbubble(i),
      1   qpair(i),qphoto(i),qbrem_nn(i),
 c     2   qmurca_nucl(i),qbrem_nucl(i),qasync(i),qmurca_hyp(i),qbrem_hyp(i),
@@ -684,7 +762,8 @@ c *********************************************************************
        a=a_cell(i)
        a1=a_ion(i)
        z=z_ion(i)
-       call neutrino(i,t,time,d,a,z,qnu1(i),
+
+       call neutrino(i,t,ProcessID,time,d,a,z,qnu1(i),
      1          qn00,qn01,qn02,qn03,qn04,qn05,qn06,qn07,qn08,qn09,q10,
      2               qn11,qn12,qn13,qn14,qn15,qn16,qn17,qn18,qn19,q20,
      3               qn21,qn22,qn23,

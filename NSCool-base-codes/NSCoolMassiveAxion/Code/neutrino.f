@@ -1,4 +1,4 @@
-      subroutine neutrino(i,t,time,rho,a,z,qtot,
+      subroutine neutrino(i,t,ProcessID,time,rho,a,z,qtot,
      1   qeebrem,qnpb,qplasma,qsynch,qbubble,qpair,qphoto,qbrem_nn,
      2   qmurca_nucl,qbrem_nucl,qasync,qmurca_hyp,qbrem_hyp,
      3   qdurca_np,qdurca_lap,qdurca_smn,qdurca_smla,qdurca_sms0,
@@ -13,6 +13,7 @@ c **** checked  august 21 1991 **************
 
       real*8 :: test_emissivity
       real*8 :: test_Bfield, test_Temp, test_pfermi
+      integer :: ProcessID
 
       INCLUDE 'size.inc.f'
       INCLUDE 'rho_limits.inc.f'
@@ -41,7 +42,6 @@ c      test_Temp = 40
 c      test_pfermi = 0.1
 c      test_emissivity = emissivity(test_Bfield, test_Temp, test_pfermi)
 c      write(6,*)"emissivity: ",test_emissivity
-
  
       if (debug.ge.2.) print *,'Entering subroutine `neutrino'' ',
      2       ' T, rho, A, Z = ',t,rho,a,z
@@ -135,7 +135,9 @@ c **** PHOTO-NEUTRINO:
       end if
 c *** NN-BREMSTRAHLUNG in the inner crust:
       if ((rho.lt.rhocore).and.(rho.ge.rhodrip)) then
-         call nubrem_crust_nn(i,t,v_ion(i),qbrem_nn)
+         call nubrem_crust_nn(i,t,v_ion(i),qbrem_nn,qasync,ProcessID)
+         qbrem_nn=qbrem_nn + qasync
+         qasync=0.d0
       else
          qbrem_nn=0.d0
       end if
@@ -145,7 +147,8 @@ c *** URCA et al. PROCESSES:
             call numurca_nucl(i,t,qmurca_nucl)
             qmurca_nucl=qmurca_nucl*(1.d0+murca_increase)
             qmurca_nucl=qmurca_nucl*fhad(i)
-            call nubrem_nucl(i,t,time,qbrem_nucl,qasync)
+
+            call nubrem_nucl(i,t,time,qbrem_nucl,qasync,ProcessID)
 c              ,h_dim,
 c     1        h_bfield,h_temp,h_pfermi,h_emissivity,h_b0,h_b1,
 c     2        h_t0,h_t1,h_p0,h_p1)

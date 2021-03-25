@@ -13,8 +13,8 @@ OTHER MODEL FILES:
   'I_Files/I_Bfield_0.dat'
   'I_Files/I_Accretion_0.dat'
 OUTPUT FILES:
-  'I.dat'
-  'Teff_Try.dat'
-  'Temp_Try.dat'
-  'Star_Try.dat'
+  'Model_1/I.dat'
+  'Model_1/Teff_Try.dat'
+  'Model_1/Temp_Try.dat'
+  'Model_1/Star_Try.dat'
 
