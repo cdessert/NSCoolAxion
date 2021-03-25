@@ -469,8 +469,8 @@ c in erg/cm^3/s
      &            * (t/1.d8)**6d0 * mstn(i)**2d0 
 
       qabrem_nn_super = qabrem_nn * rbrem_nn
-      qabrem_pp_super = qabrem_pp * rbrem_np
-      qabrem_np_super = qabrem_np * rbrem_pp
+      qabrem_pp_super = qabrem_pp * rbrem_pp
+      qabrem_np_super = qabrem_np * rbrem_np
 
 
 
