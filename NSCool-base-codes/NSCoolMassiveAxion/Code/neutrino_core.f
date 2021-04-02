@@ -206,8 +206,8 @@ c **** Reduction from ion's volume:
 c *************************** _compute_nucleon_star_factors
 c all in GeV
       fmG=1.973d-1
-      m_n = 0.939
       m_pi = 0.140d0
+      m_n = 0.939
 
       star_kfn_crust = kfn(i) * fmG
 
@@ -415,6 +415,7 @@ c all in GeV
 
       fmG=1.973d-1
       m_pi = 0.140d0
+      m_n = 0.939
       K2keV=8.617d-8
       star_kfn_core = kfn(i) * fmG
       star_kfp_core = kfp(i) * fmG
@@ -518,6 +519,8 @@ c 1s0 n
       else
        PBF_s_n_epsilon = 0d0
       endif
+
+c      write(*,*) PBF_s_n_epsilon,PBF_s_p_epsilon
 
 c 3p2 A
       if(t .lt. tcn(i))then
