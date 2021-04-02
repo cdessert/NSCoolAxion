@@ -200,19 +200,26 @@ c **** Reduction from ion's volume:
       qbrem_nn=rbrem_nn*qbrem_nn * (1.d0-vion)
 
  
-c *************************** PBF
-      fmG=1.973d-1
 
-c *************************** set couplings
-      gann = 1d-8
-      gapp = 1d-8
+
 
 c *************************** _compute_nucleon_star_factors
 c all in GeV
+      fmG=1.973d-1
       m_n = 0.939
+      m_pi = 0.140d0
+
       star_kfn_crust = kfn(i) * fmG
- 
+
       PBF_s_n_star_factor = (star_kfn_crust/0.337d0)**3d0
+      PBF_p_star_factor = (star_kfn_crust/0.337d0)
+
+      m_x = m_pi / (2.d0*star_kfn_crust) 
+      Fx    = 1.d0 - 3.d0/2.d0 * m_x * atan(1.d0/m_x) +
+     &        m_x**2.d0 / 2.d0 / (1.d0+x**2)
+      eann_star_factor = (star_kfn_crust/0.337d0) * Fx/0.607211d0
+ 
+c *************************** PBF
 
 c 1s0 n
       if(t .lt. tcn(i))then
@@ -230,12 +237,61 @@ c 1s0 n
        PBF_s_n_epsilon = 0d0
       endif
 
+c 3p2 A
+      if(t .lt. tcn(i))then
+       tau = t/tcn(i)
+       Delta_T_3p2A = t * sqrt(1d0-tau)*(0.7893d0 + 1.118d0/tau)
+       zn = Delta_T_3p2A / t
+       IanPA = IpnA_interp(zn)
+       PBF_pA_epsilon = 1.67d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/3d8)**5d0 * (IanPA/5.96d-3)
+      else
+       PBF_pA_epsilon = 0d0
+      endif
+
+c 3p2 B
+      if(t .lt. tcn(i))then
+       tau = t/tcn(i)
+       Delta_T_3p2B = t * sqrt(1d0-tau**4d0)/tau
+     &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
+       zn = Delta_T_3p2B / t
+       IanPB = IpnB_interp(zn)
+       PBF_pB_epsilon = 1.67d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/3d8)**5d0 * (IanPB/5.96d-3)
+      else
+       PBF_pB_epsilon = 0d0
+      endif
+
+c *************************** _do_nucelon
+c in erg/cm^3/s
+      qabrem_nn = 1.827e12 * eann_star_factor * (t/1.d8)**6d0
+     &            * (gann/1d-10)**2d0 * mstn(i)**2d0
+      qabrem_nn_super = qabrem_nn * rbrem_nn
+
+
+c ***************************
 
       qasync = 0d0
-      
-      if (IAND(pid_PBF_s_n,ProcessID).gt.0) then
+
+      if (IAND(pid_nn_inner_crust,ProcessID).gt.0) then
+       qasync = qasync + qabrem_nn
+      endif       
+      if (IAND(pid_nn_inner_crust_super,ProcessID).gt.0) then
+       qasync = qasync + qabrem_nn_super
+      endif      
+      if (IAND(pid_PBF_s_n_inner_crust,ProcessID).gt.0) then
        qasync = qasync + PBF_s_n_epsilon
       endif
+      if (IAND(pid_PBF_pA_inner_crust,ProcessID).gt.0) then
+       qasync = qasync + PBF_pA_epsilon
+      endif
+      if (IAND(pid_PBF_pB_inner_crust,ProcessID).gt.0) then
+       qasync = qasync + PBF_pB_epsilon
+      endif
+ 
+
+c **** Reduction from ion's volume:
+      qasync = qasync * (1.d0-vion)
 
       return
 
@@ -320,60 +376,76 @@ c Brem_pp:  p+p -> p+p+2nu
       beta_pp=0.7d0
       qbrem_pp=n_nu * 7.4d19 *       mstp(i)**4      * 
      1         (kfp(i)/1.68d0) * alpha_pp * beta_pp * (t/1.d9)**8
-    
+   
+
+
+c **** effect of superfluidity :
+
+      qbrem_nn=rbrem_nn*qbrem_nn
+      qbrem_np=rbrem_np*qbrem_np
+      qbrem_pp=rbrem_pp*qbrem_pp
+
+      qbrem_nucl=qbrem_nn+qbrem_np+qbrem_pp
+
+
+
+
+
+
+
+
+c *************************** 
+
+ 
 c      efac=303d-3 
 c      K2GeV=8.617d-14
-      fmG=1.973d-1
 c      gaee=1d-10
 c      GeVtoem=3.155d62
 c      GtoG2=1.95d-20
 c      Bfie=4.41d13*GtoG2
-      
-      K2keV=8.617d-8
 c      invfm2GeV=1.973d-1
 c      Bfield_G = 2.0d13
 c      gamm = 0d-9
      
 
-c *************************** set couplings
-       gann = 1d-8
-       gapp = 1d-8
-
-       g_c = gapp + gann
-       h_c = gapp - gann
-
 c *************************** _compute_nucleon_star_factors
 c all in GeV
-       m_pi = 0.140d0
-       star_kfn_core = kfn(i) * fmG
-       star_kfp_core = kfp(i) * fmG
+      g_c = gapp + gann
+      h_c = gapp - gann
 
-       m_x = m_pi / (2.d0*star_kfn_core) 
-       m_y = m_pi / (2.d0*star_kfp_core) 
-       xyp = 2.d0 * m_x * m_y /(m_x+m_y)
-       xym = 2.d0 * m_x * m_y /(m_x-m_y)
+      fmG=1.973d-1
+      m_pi = 0.140d0
+      K2keV=8.617d-8
+      star_kfn_core = kfn(i) * fmG
+      star_kfp_core = kfp(i) * fmG
 
-       Fx    = 1.d0 - 3.d0/2.d0 * m_x * atan(1.d0/m_x) +
+      m_x = m_pi / (2.d0*star_kfn_core) 
+      m_y = m_pi / (2.d0*star_kfp_core) 
+      xyp = 2.d0 * m_x * m_y /(m_x+m_y)
+      xym = 2.d0 * m_x * m_y /(m_x-m_y)
+
+      Fx    = 1.d0 - 3.d0/2.d0 * m_x * atan(1.d0/m_x) +
      &        m_x**2.d0 / 2.d0 / (1.d0+x**2)
-       Fy    = 1.d0 - 3.d0/2.d0 * m_y * atan(1.d0/m_y) +
+      Fy    = 1.d0 - 3.d0/2.d0 * m_y * atan(1.d0/m_y) +
      &        m_y**2.d0 / 2.d0 / (1.d0+y**2)
-       Fxyp  = 1.d0 - 3.d0/2.d0 * xyp * atan(1.d0/xyp) +
+      Fxyp  = 1.d0 - 3.d0/2.d0 * xyp * atan(1.d0/xyp) +
      &        m_y**2.d0 / 2.d0 / (1.d0+xyp**2)
-       Fxym  = 1.d0 - 3.d0/2.d0 * xym * atan(1.d0/xym) +
+      Fxym  = 1.d0 - 3.d0/2.d0 * xym * atan(1.d0/xym) +
      &        m_y**2.d0 / 2.d0 / (1.d0+xym**2)
 
-       eann_star_factor = (star_kfn_core/0.337d0) * Fx/0.607211d0
-       eapp_star_factor = (star_kfp_core/0.337d0) * Fy/0.607211d0
+      eann_star_factor = (star_kfn_core/0.337d0) * Fx/0.607211d0
+      eapp_star_factor = (star_kfp_core/0.337d0) * Fy/0.607211d0
                 
-       gfacg = 0.5d-1*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+      gfacg = 0.5d-1*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0-m_y*atan(1.d0/m_y))
-       gfach = 0.5d-1*Fy+0.5d-1*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+      gfach = 0.5d-1*Fy+0.5d-1*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0- m_y*atan(1.d0/m_y))
 
       eanp_star_factor_g = (star_kfn_core/0.337d0) * gfacg
       eanp_star_factor_h = (star_kfn_core/0.337d0) * gfach
 
       PBF_s_p_star_factor = (star_kfp_core/0.337d0)**3d0
+      PBF_s_n_star_factor = (star_kfn_core/0.337d0)**3d0
       PBF_p_star_factor = (star_kfn_core/0.337d0)
 
 c *************************** superfluidity
@@ -431,6 +503,21 @@ c 1s0 p
        PBF_s_p_epsilon = 0d0
       endif
 
+c 1s0 n
+      if(t .lt. tcn(i))then
+       tau = t/tcn(i)
+       Delta_T_s_n = t * sqrt( 1.d0 - tau ) * ( 1.456d0 
+     &               - 0.157d0/sqrt(tau) + 1.764/tau ) 
+       zn = Delta_T_s_n / t
+       Ias_n = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
+     &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
+     &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
+       PBF_s_n_epsilon = 7.01d14 * (gann/1d-10)**2d0
+     &                   * PBF_s_n_star_factor * (t/3d8)**5d0
+     &                   * (1d0/m_n)**2d0 * (Ias_n/2.2d-2)
+      else
+       PBF_s_n_epsilon = 0d0
+      endif
 
 c 3p2 A
       if(t .lt. tcn(i))then
@@ -473,6 +560,48 @@ c in erg/cm^3/s
       qabrem_np_super = qabrem_np * rbrem_np
 
 
+c *************************** leptons
+
+      alphaEM = 1.d0/137.d0
+      alpha_e = 4.d0*pi*gaee
+      alpha_m = 4.d0*pi*gamm
+
+c GeV
+      rhoGeV = rrho(i) * 4.31013e-18
+      TGeV = t * 8.61733e-14
+      me = 5.11e-4
+      mm =0.105658d0
+      mu = 0.9315d0
+
+      GammaI = 22.73 * 1.d6 / t * ( rrho(i)/1.d6 )**(1.d0/3.d0)
+      xState = LOG( rrho(i) )
+
+      if( xState.gt.11.4d0 ) then
+       a = -6.47808d0
+       b = 0.068645d0
+       c = -0.000252677d0
+      else
+       a = 0.21946d0
+       b = 0.00287263d0
+       c = -0.000142016d0
+      endif
+
+      if( GammaI.gt.178 ) then
+       u = 0.488049d0 + 1.25585d0*GammaI/1.d3 - 
+     &     0.743902d0*(GammaI/1.d3)**(2.d0)
+      else
+       u = 0.672409d0 + 0.182774d0*GammaI/1.d3 - 
+     &     0.144817d0*(GammaI/1.d3)**(2.d0)
+      endif
+
+      Fep = EXP( a + b*xState**2.d0 + c*xState**4.d0 - 1.d0+u )
+      Fem = Fep * mm / me
+
+      qabrem_e = 3.168d62 * pi**2.d0 / 15.d0 * alphaEM**2.d0 * alpha_e 
+     &         * rhoGeV * TGeV**4.d0 / me**2.d0 / mu * Fep
+      qabrem_m = 3.168d62 * pi**2.d0 / 15.d0 * alphaEM**2.d0 * alpha_m 
+     &         * rhoGeV * TGeV**4.d0 / mm**2.d0 / mu * Fep
+
 
 c *************************** synchotron
  
@@ -491,18 +620,6 @@ c      end if
 
 
 
-
-
-
-
-c **** effect of superfluidity :
-
-      qbrem_nn=rbrem_nn*qbrem_nn
-      qbrem_np=rbrem_np*qbrem_np
-      qbrem_pp=rbrem_pp*qbrem_pp
-
-      qbrem_nucl=qbrem_nn+qbrem_np+qbrem_pp
-
      
 
 c ***************************
@@ -511,34 +628,42 @@ c ***************************
       if (IAND(pid_synchotron,ProcessID).gt.0) then
        qasync = qasync + qasync_0
       endif
-      if (IAND(pid_nn,ProcessID).gt.0) then
+      if (IAND(pid_nn_core,ProcessID).gt.0) then
        qasync = qasync + qabrem_nn 
       endif
-      if (IAND(pid_pp,ProcessID).gt.0) then
+      if (IAND(pid_pp_core,ProcessID).gt.0) then
        qasync = qasync + qabrem_pp
       endif
-      if (IAND(pid_np,ProcessID).gt.0) then
+      if (IAND(pid_np_core,ProcessID).gt.0) then
        qasync = qasync + qabrem_np
       endif
-      if (IAND(pid_nn_super,ProcessID).gt.0) then
+      if (IAND(pid_nn_core_super,ProcessID).gt.0) then
        qasync = qasync + qabrem_nn_super
       endif
-      if (IAND(pid_pp_super,ProcessID).gt.0) then
+      if (IAND(pid_pp_core_super,ProcessID).gt.0) then
        qasync = qasync + qabrem_pp_super
       endif
-      if (IAND(pid_np_super,ProcessID).gt.0) then
+      if (IAND(pid_np_core_super,ProcessID).gt.0) then
        qasync = qasync + qabrem_np_super
       endif
-      if (IAND(pid_PBF_s_p,ProcessID).gt.0) then
+      if (IAND(pid_PBF_s_p_core,ProcessID).gt.0) then
        qasync = qasync + PBF_s_p_epsilon
       endif
-      if (IAND(pid_PBF_pA,ProcessID).gt.0) then
+      if (IAND(pid_PBF_s_n_core,ProcessID).gt.0) then
+       qasync = qasync + PBF_s_n_epsilon
+      endif
+      if (IAND(pid_PBF_pA_core,ProcessID).gt.0) then
        qasync = qasync + PBF_pA_epsilon
       endif
-      if (IAND(pid_PBF_pB,ProcessID).gt.0) then
+      if (IAND(pid_PBF_pB_core,ProcessID).gt.0) then
        qasync = qasync + PBF_pB_epsilon
       endif
-
+      if (IAND(pid_ep_core,ProcessID).gt.0) then
+       qasync = qasync + qabrem_e
+      endif
+      if (IAND(pid_mp_core,ProcessID).gt.0) then
+       qasync = qasync + qabrem_m
+      endif
 
 
       return

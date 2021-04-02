@@ -48,7 +48,8 @@ c      write(6,*)"emissivity: ",test_emissivity
 c *** ELECTRON-ELECTRON PAIR BREMSSTRAHLUNG:
       if (rho.lt.rhocore) then
          mu_el=kfe(i)*197.
-         call neebrem(T,mu_el,qeebrem)
+         call neebrem(T,mu_el,qeebrem,qasync,ProcessID)
+         qeebrem = qeebrem + qasync
       else
          qeebrem=0.0d0
       end if

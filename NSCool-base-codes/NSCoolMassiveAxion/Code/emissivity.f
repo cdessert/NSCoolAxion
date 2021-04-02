@@ -29,4 +29,52 @@
       end function
 
 
+      function IpnA_interp(zn)
+         Implicit None
+         real*8 :: zn,IpnA_interp
+         integer ind
+         integer,parameter :: p_dimI = 1000
+         real*8,dimension(1:p_dimI) :: IA_x
+         real*8,dimension(1:p_dimI) :: IA_y
+         real*8,dimension(1:p_dimI) :: IB_x
+         real*8,dimension(1:p_dimI) :: IB_y
+         common/PBF_I/IA_x,IA_y,IB_x,IB_y
+
+         ind = int( (zn - IA_x(1)) / ( IA_x(p_dimI) - IA_x(1) )
+     &       *p_dimI+1.5 )
+
+         if( (ind.lt.1).or.(ind.gt.p_dimI) ) then
+            IpnA_interp = 0d0
+         else
+            IpnA_interp = IA_y(ind) 
+         endif
+
+         return
+      end function
+
+
+      function IpnB_interp(zn)
+         Implicit None
+         real*8 :: zn,IpnB_interp
+         integer ind
+         integer,parameter :: p_dimI = 1000
+         real*8,dimension(1:p_dimI) :: IA_x
+         real*8,dimension(1:p_dimI) :: IA_y
+         real*8,dimension(1:p_dimI) :: IB_x
+         real*8,dimension(1:p_dimI) :: IB_y
+         common/PBF_I/IA_x,IA_y,IB_x,IB_y
+
+         ind = int( (zn - IB_x(1)) / ( IB_x(p_dimI) - IB_x(1) ) 
+     &       *p_dimI+1.5 )
+
+         if( (ind.lt.1).or.(ind.gt.p_dimI) ) then
+            IpnB_interp = 0d0
+         else
+            IpnB_interp = IB_y(ind) 
+         endif
+
+         return
+      end function
+
+
 

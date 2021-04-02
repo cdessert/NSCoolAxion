@@ -184,42 +184,67 @@ c Process switch
       read (arg,'(I64)') ProcessID
       write(*,*) 'ID:',ProcessID
 
+      write(*,*) '-------------------------------'
       write(*,*) 'The following axion processes will be switched on:'
       if (ProcessID.eq.0) then
        write(*,*) 'None'
       endif
       if (IAND(pid_synchotron,ProcessID).gt.0) then
-       write(*,*) 'synchotron'
+       write(*,*) 'synchotron radiation'
       endif
-      if (IAND(pid_nn,ProcessID).gt.0) then
-       write(*,*) 'bremsstrahlung nn'
+      if (IAND(pid_nn_core,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung nn (core)'
       endif
-      if (IAND(pid_pp,ProcessID).gt.0) then
-       write(*,*) 'bremsstrahlung pp'
+      if (IAND(pid_pp_core,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung pp (core)'
       endif
-      if (IAND(pid_np,ProcessID).gt.0) then
-       write(*,*) 'bremsstrahlung np'
+      if (IAND(pid_np_core,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung np (core)'
       endif
-      if (IAND(pid_nn_super,ProcessID).gt.0) then
-       write(*,*) 'bremsstrahlung nn with superfluidity suppression'
+      if (IAND(pid_nn_inner_crust,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung nn (inner crust)'
       endif
-      if (IAND(pid_pp_super,ProcessID).gt.0) then
-       write(*,*) 'bremsstrahlung pp with superfluidity suppression'
+      if (IAND(pid_nn_core_super,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung nn (core) with superfluidity'
       endif
-      if (IAND(pid_np_super,ProcessID).gt.0) then
-       write(*,*) 'bremsstrahlung np with superfluidity suppression'
+      if (IAND(pid_pp_core_super,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung pp (core) with superfluidity'
       endif
-      if (IAND(pid_PBF_s_p,ProcessID).gt.0) then
-       write(*,*) 'PBF 1s0 p'
+      if (IAND(pid_np_core_super,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung np (core) with superfluidity'
       endif
-      if (IAND(pid_PBF_s_n,ProcessID).gt.0) then
-       write(*,*) 'PBF 1s0 n'
+      if (IAND(pid_nn_inner_crust_super,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung nn (inner crust) with superfluidity'
       endif
-       if (IAND(pid_PBF_pA,ProcessID).gt.0) then
-       write(*,*) 'PBF 3p2 A'
+      if (IAND(pid_PBF_s_p_core,ProcessID).gt.0) then
+       write(*,*) 'PBF 1s0 p (core)'
       endif
-       if (IAND(pid_PBF_pB,ProcessID).gt.0) then
-       write(*,*) 'PBF 3p2 B'
+      if (IAND(pid_PBF_s_n_core,ProcessID).gt.0) then
+       write(*,*) 'PBF 1s0 n (core)'
+      endif
+      if (IAND(pid_PBF_s_n_inner_crust,ProcessID).gt.0) then
+       write(*,*) 'PBF 1s0 n (inner_crust)'
+      endif
+      if (IAND(pid_PBF_pA_core,ProcessID).gt.0) then
+       write(*,*) 'PBF 3p2 A (core)'
+      endif
+       if (IAND(pid_PBF_pB_core,ProcessID).gt.0) then
+       write(*,*) 'PBF 3p2 B (core)'
+      endif
+      if (IAND(pid_PBF_pA_inner_crust,ProcessID).gt.0) then
+       write(*,*) 'PBF 3p2 A (inner crust)'
+      endif
+      if (IAND(pid_PBF_pB_inner_crust,ProcessID).gt.0) then
+       write(*,*) 'PBF 3p2 B (inner crust)'
+      endif
+      if (IAND(pid_mp_core,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung muon-p (core)'
+      endif
+      if (IAND(pid_ep_core,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung e-p (core)'
+      endif
+      if (IAND(pid_eI_crust,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung e-Ion (crust)'
       endif
       write(*,*) '-------------------------------'
 

@@ -2,7 +2,7 @@ c *********************************************************************
 c *********************************************************************
 c *********************************************************************
 c *********************************************************************
-      subroutine neebrem(T,mu,qeebrem)
+      subroutine neebrem(T,mu,qeebrem,qasync,ProcessID)
 c *********************************************************************
 c *  calculate the energy loss rate per cubic centimeter              *
 c *  from the electron-electron neutrino pair bremsstrahlung.         *
@@ -14,6 +14,13 @@ c *                                                                   *
 c *********************************************************************
        implicit real*8 (a-h,k-z)
 c       INCLUDE 'Base_Dir.inc.f'
+       INCLUDE 'size.inc.f'
+       INCLUDE 'pid.inc.f'
+       INCLUDE 'profile_star.inc.f'
+       INCLUDE 'profile_comp.inc.f'
+
+       parameter (pi = 3.14159265d0)
+       integer :: ProcessID
        dimension logt(56),nalpha(56),n2(56)
        save logt,nalpha,n2,i_do_it
 c***************************************************
@@ -35,7 +42,46 @@ c***************************************************
 
         qeebrem=2.16d14 * (T/1.d9)**7 * (mu/10.d0)**2 * naa
 
-       return
+
+
+
+c *************************** e-Ion
+
+        GammaI = 22.73 * z_ion(i)**2 * 1.d6 / t
+     &       * ( rrho(i)/1.d6 / a_ion(i) )**(1.d0/3.d0)
+        xState = LOG( rrho(i) )
+
+        if( xState.gt.11.4d0 ) then
+         a = -6.47808d0
+         b = 0.068645d0
+         c = -0.000252677d0
+        else
+         a = 0.21946d0
+         b = 0.00287263d0
+         c = -0.000142016d0
+        endif
+
+        if( GammaI.gt.178 ) then
+         u = 0.488049d0 + 1.25585d0*GammaI/1.d3 - 
+     &       0.743902d0*(GammaI/1.d3)**(2.d0)
+        else
+         u = 0.672409d0 + 0.182774d0*GammaI/1.d3 - 
+     &       0.144817d0*(GammaI/1.d3)**(2.d0)
+        endif
+
+        FeIon = EXP( a + b*xState**2.d0 + c*xState**4.d0 - 1.d0+u )
+
+        qaebremIon = 10.8d0 * rrho(i) * gaee**2.d0 / (4.d0*pi*1.d-26) 
+     &           * T/1.d8 * FeIon
+
+
+c ***************************
+      qasync = 0d0
+      if (IAND(pid_eI_crust,ProcessID).gt.0) then
+       qasync = qasync + qaebremIon
+      endif
+
+      return
       end
 c *********************************************************************
 c *********************************************************************
