@@ -377,7 +377,43 @@ c Brem_pp:  p+p -> p+p+2nu
       qbrem_pp=n_nu * 7.4d19 *       mstp(i)**4      * 
      1         (kfp(i)/1.68d0) * alpha_pp * beta_pp * (t/1.d9)**8
    
+c *************************** superfluidity
+      if(t .lt. tcn(i))then
+       if (i.ge.isf) then
+        tt=t/tcn(i)
+        u=u_1s0(tt)
+        rbrem_nn_n=rbrem_nn_n1s0(u)
+        rbrem_np_n=rbrem_np_n1s0(u)
+        rbrem_pp_n=rbrem_pp_n1s0(u)
+       else
+        tt=t/tcn(i)
+        u=u_3p2B(tt)
+        rbrem_nn_n=rbrem_nn_n3p2B(u)
+        rbrem_np_n=rbrem_np_n3p2B(u)
+        rbrem_pp_n=rbrem_pp_n3p2B(u)
+       end if
+      else
+       rbrem_nn_n=1.0d0
+       rbrem_np_n=1.0d0
+       rbrem_pp_n=1.0d0
+      end if
 
+      if(t .lt. tcp(i))then
+        tt=t/tcp(i)
+        u=u_1s0(tt)
+        rbrem_nn_p=rbrem_nn_p1s0(u)
+        rbrem_np_p=rbrem_np_p1s0(u)
+        rbrem_pp_p=rbrem_pp_p1s0(u)
+      else
+       rbrem_nn_p=1.0d0
+       rbrem_np_p=1.0d0
+       rbrem_pp_p=1.0d0
+      end if
+
+      rbrem_nn=min(rbrem_nn_p,rbrem_nn_n)
+      rbrem_np=min(rbrem_np_p,rbrem_np_n)
+      rbrem_pp=min(rbrem_pp_p,rbrem_pp_n)
+ 
 
 c **** effect of superfluidity :
 
@@ -449,43 +485,7 @@ c all in GeV
       PBF_s_n_star_factor = (star_kfn_core/0.337d0)**3d0
       PBF_p_star_factor = (star_kfn_core/0.337d0)
 
-c *************************** superfluidity
-      if(t .lt. tcn(i))then
-       if (i.ge.isf) then
-        tt=t/tcn(i)
-        u=u_1s0(tt)
-        rbrem_nn_n=rbrem_nn_n1s0(u)
-        rbrem_np_n=rbrem_np_n1s0(u)
-        rbrem_pp_n=rbrem_pp_n1s0(u)
-       else
-        tt=t/tcn(i)
-        u=u_3p2B(tt)
-        rbrem_nn_n=rbrem_nn_n3p2B(u)
-        rbrem_np_n=rbrem_np_n3p2B(u)
-        rbrem_pp_n=rbrem_pp_n3p2B(u)
-       end if
-      else
-       rbrem_nn_n=1.0d0
-       rbrem_np_n=1.0d0
-       rbrem_pp_n=1.0d0
-      end if
 
-      if(t .lt. tcp(i))then
-        tt=t/tcp(i)
-        u=u_1s0(tt)
-        rbrem_nn_p=rbrem_nn_p1s0(u)
-        rbrem_np_p=rbrem_np_p1s0(u)
-        rbrem_pp_p=rbrem_pp_p1s0(u)
-      else
-       rbrem_nn_p=1.0d0
-       rbrem_np_p=1.0d0
-       rbrem_pp_p=1.0d0
-      end if
-
-      rbrem_nn=min(rbrem_nn_p,rbrem_nn_n)
-      rbrem_np=min(rbrem_np_p,rbrem_np_n)
-      rbrem_pp=min(rbrem_pp_p,rbrem_pp_n)
- 
 c *************************** PBF
 
 c 1s0 p
