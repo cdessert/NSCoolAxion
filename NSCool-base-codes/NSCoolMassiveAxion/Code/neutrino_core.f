@@ -564,8 +564,8 @@ c in erg/cm^3/s
 c *************************** leptons
 
       alphaEM = 1.d0/137.d0
-      alpha_e = 4.d0*pi*gaee
-      alpha_m = 4.d0*pi*gamm
+      alpha_e = gaee**2.d0/(4.d0*pi)
+      alpha_m = gamm**2.d0/(4.d0*pi)
 
 c GeV
       rhoGeV = rrho(i) * 4.31013e-18
