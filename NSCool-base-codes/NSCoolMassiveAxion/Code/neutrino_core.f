@@ -323,7 +323,7 @@ c**********************************************************************
       INCLUDE 'fermi.inc.f'
       INCLUDE 'control_nu.inc.f'
       integer :: ProcessID
-      real*8 Ias_p,IanPA,IanPB
+      real*8 Ias_p,Ias_n,IanPA,IanPB
       
 c      common/h_tables/h_bfield,h_temp,h_pfermi,h_emissivity
 
@@ -415,7 +415,7 @@ c all in GeV
 
       fmG=1.973d-1
       m_pi = 0.140d0
-      m_n = 0.939
+      m_n = 0.939d0
       K2keV=8.617d-8
       star_kfn_core = kfn(i) * fmG
       star_kfp_core = kfp(i) * fmG
@@ -508,7 +508,7 @@ c 1s0 n
       if(t .lt. tcn(i))then
        tau = t/tcn(i)
        Delta_T_s_n = t * sqrt( 1.d0 - tau ) * ( 1.456d0 
-     &               - 0.157d0/sqrt(tau) + 1.764/tau ) 
+     &               - 0.157d0/sqrt(tau) + 1.764d0/tau ) 
        zn = Delta_T_s_n / t
        Ias_n = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
      &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
@@ -519,8 +519,6 @@ c 1s0 n
       else
        PBF_s_n_epsilon = 0d0
       endif
-
-c      write(*,*) PBF_s_n_epsilon,PBF_s_p_epsilon
 
 c 3p2 A
       if(t .lt. tcn(i))then
