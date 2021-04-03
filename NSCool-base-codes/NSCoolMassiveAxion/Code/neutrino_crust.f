@@ -2,7 +2,7 @@ c *********************************************************************
 c *********************************************************************
 c *********************************************************************
 c *********************************************************************
-      subroutine neebrem(T,mu,qeebrem,qasync,ProcessID)
+      subroutine neebrem(i,T,mu,qeebrem,qasync,ProcessID)
 c *********************************************************************
 c *  calculate the energy loss rate per cubic centimeter              *
 c *  from the electron-electron neutrino pair bremsstrahlung.         *
