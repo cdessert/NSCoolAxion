@@ -49,7 +49,7 @@ c *************************** e-Ion
 
         GammaI = 22.73 * z_ion(i)**2 * 1.d6 / t
      &       * ( rrho(i)/1.d6 / a_ion(i) )**(1.d0/3.d0)
-        xState = LOG( rrho(i) )
+        xState = LOG10( rrho(i) )
 
         if( xState.gt.11.4d0 ) then
          a = -6.47808d0
@@ -69,11 +69,13 @@ c *************************** e-Ion
      &       0.144817d0*(GammaI/1.d3)**(2.d0)
         endif
 
-        FeIon = EXP( a + b*xState**2.d0 + c*xState**4.d0 - 1.d0+u )
+        FeIon = 10.d0**( a + b*xState**2.d0 + c*xState**4.d0 - 1.d0+u )
 
         qaebremIon = 10.8d0 * rrho(i) * gaee**2.d0 / (4.d0*pi*1.d-26) 
      &           * T/1.d8 * FeIon
 
+
+c      write(*,*) qaebremIon,T,FeIon,xState,GammaI
 
 c ***************************
       qasync = 0d0

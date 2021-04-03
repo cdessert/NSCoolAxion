@@ -575,7 +575,7 @@ c GeV
       mu = 0.9315d0
 
       GammaI = 22.73 * 1.d6 / t * ( rrho(i)/1.d6 )**(1.d0/3.d0)
-      xState = LOG( rrho(i) )
+      xState = LOG10( rrho(i) )
 
       if( xState.gt.11.4d0 ) then
        a = -6.47808d0
@@ -595,14 +595,15 @@ c GeV
      &     0.144817d0*(GammaI/1.d3)**(2.d0)
       endif
 
-      Fep = EXP( a + b*xState**2.d0 + c*xState**4.d0 - 1.d0+u )
-      Fem = Fep * mm / me
+      Fep = 10.d0**( a + b*xState**2.d0 + c*xState**4.d0 - 1.d0+u )
+      Fem = Fep * mm**2.d0 / me**2.d0
 
       qabrem_e = 3.168d62 * pi**2.d0 / 15.d0 * alphaEM**2.d0 * alpha_e 
      &         * rhoGeV * TGeV**4.d0 / me**2.d0 / mu * Fep
       qabrem_m = 3.168d62 * pi**2.d0 / 15.d0 * alphaEM**2.d0 * alpha_m 
-     &         * rhoGeV * TGeV**4.d0 / mm**2.d0 / mu * Fep
+     &         * rhoGeV * TGeV**4.d0 / mm**2.d0 / mu * Fem
 
+c      write(*,*) qabrem_e, GammaI, xState, Fep, u
 
 c *************************** synchotron
  
