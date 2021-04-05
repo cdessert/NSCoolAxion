@@ -20,5 +20,5 @@
        
        real*8,parameter :: gann=1.d-10
        real*8,parameter :: gapp=1.d-10
-       real*8,parameter :: gaee=1.d-22
-       real*8,parameter :: gamm=1.d-22
+       real*8,parameter :: gaee=1.d-10
+       real*8,parameter :: gamm=1.d-10
