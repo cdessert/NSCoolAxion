@@ -64,10 +64,11 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 c**** Input/Output:
 
+      character*128 folder
       character*90 filename
       character*79 model
       character*80  f_concryst
-      character*100 f_Bound,f_Pairing,f_Neutrino,f_Conduct,
+      character*128 f_Bound,f_Pairing,f_Neutrino,f_Conduct,
      x              f_Heat,f_Bfield,f_Accretion,f_Strange
       dimension tprint(0:50)
       common/print/pcore,model
@@ -176,13 +177,35 @@ c PBF I
 
 
 c Process switch
-      character(len=64) :: arg
+      character(len=64) :: argProcess
+      character(len=64) :: argEOS,argPairing,argMass
+      character(len=64) :: arggann,arggapp,arggaee,arggamm
       integer :: ProcessID
+      integer :: EOSID,PairingID
 
+      call getarg(1,argProcess)
+      call getarg(2,argEOS)
+      call getarg(3,argPairing)
+      call getarg(4,argMass)
+      call getarg(5,arggann)
+      call getarg(6,arggapp)
+      call getarg(7,arggaee)
+      call getarg(8,arggamm)
+      read (argProcess,'(I64)') ProcessID
+      read (argEOS,'(I64)') EOSID
+      read (argPairing,'(I64)') PairingID
+      read (argMass,*) Mass
+      read (arggann,*) gann
+      read (arggapp,*) gapp
+      read (arggaee,*) gaee
+      read (arggamm,*) gamm
 
-      call getarg(1,arg)
-      read (arg,'(I64)') ProcessID
-      write(*,*) 'ID:',ProcessID
+      write(*,*) 'ID:',ProcessID,EOSID,PairingID
+      write(*,*) 'Mass:',Mass
+      write(*,*) 'g_ann:',gann
+      write(*,*) 'g_app:',gapp
+      write(*,*) 'g_aee:',gaee
+      write(*,*) 'g_amm:',gamm
 
       write(*,*) '-------------------------------'
       write(*,*) 'The following axion processes will be switched on:'
@@ -351,7 +374,15 @@ c       read(5,*)filename
 c ***  Can add here the directory where "Cool_*.in" is:
 c       filename='Model_1/'//filename
 c ***  Or define it completely here: **********************************
-       filename='Model_1_'//trim(arg)//'/Cool_Try.in'
+
+       folder='Runs/'//trim(argProcess)//'/'//trim(argEOS)//
+     1          '_'//trim(argPairing)//'_'//trim(argMass)//
+     2          '/'//trim(arggann)//'_'//trim(arggapp)//
+     3          '_'//trim(arggaee)//'_'//trim(arggamm)//'/'
+
+       filename=trim(folder)//'Cool_Try.in'
+
+
        write(6,*)'Using as input: ',filename
 c**********************************************************************
        open(unit=15,file=filename,status='old')
@@ -389,10 +420,44 @@ c *** OUTPUT FILES: ***************************************************
       read(15,*,end=9997,err=9997)f_Temp
       read(15,*,end=9997,err=9997)f_Star
 
-      f_i    = 'Model_1_'//trim(arg)//'/'//f_i
-      f_Teff = 'Model_1_'//trim(arg)//'/'//f_Teff
-      f_Temp = 'Model_1_'//trim(arg)//'/'//f_Temp
-      f_Star = 'Model_1_'//trim(arg)//'/'//f_Star
+      f_i    = trim(folder)//f_i
+      f_Teff = trim(folder)//f_Teff
+      f_Temp = trim(folder)//f_Temp
+      f_Star = trim(folder)//f_Star
+ 
+      select case (EOSID) 
+        case (0)
+          f_stareos = 'EOS/APR_EOS_Cat.dat'
+          f_profile = 'TOV/Profile/Prof_APR_Cat_'
+        case (1)
+          f_stareos = 'EOS/BSk22_test.dat'
+          f_profile = 'TOV/Profile/Prof_BSk22_'
+        case (2)
+          f_stareos = 'EOS/BSk24_test.dat'
+          f_profile = 'TOV/Profile/Prof_BSk24_'
+        case (3)
+          f_stareos = 'EOS/BSk25_test.dat'
+          f_profile = 'TOV/Profile/Prof_BSk25_'
+        case (4)
+          f_stareos = 'EOS/BSk26_test.dat'
+          f_profile = 'TOV/Profile/Prof_BSk26_'
+      end select
+      f_profile = trim(f_profile)//trim(argMass)//'.dat'
+
+      select case (PairingID)
+        case (0)
+          f_Pairing = 'I_Files/I_Pairing_0-0-0.dat'
+        case (1)
+          f_Pairing = 'I_Files/I_Pairing_SFB-0-0.dat'
+        case (2)
+          f_Pairing = 'I_Files/I_Pairing_SFB-0-T73.dat'
+        case (3)
+          f_Pairing = 'I_Files/I_Pairing_SFB-a-T73.dat'
+        case (4)
+          f_Pairing = 'I_Files/I_Pairing_SFB-b-T73.dat'
+        case (5)
+          f_Pairing = 'I_Files/I_Pairing_SFB-c-T73.dat'
+      end select
 
 c**********************************************************************
 c *** PRINT ON THE SCREEN THE FILES:

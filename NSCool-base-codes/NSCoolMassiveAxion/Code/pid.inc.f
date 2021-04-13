@@ -18,7 +18,7 @@
        integer,parameter :: pid_ep_core=131072
        integer,parameter :: pid_eI_crust=262144
        
-       real*8,parameter :: gann=1.d-10
-       real*8,parameter :: gapp=1.d-10
-       real*8,parameter :: gaee=1.d-10
-       real*8,parameter :: gamm=1.d-10
+       real*8 :: gann
+       real*8 :: gapp
+       real*8 :: gaee
+       real*8 :: gamm
