@@ -9,12 +9,12 @@
 #SBATCH --mail-type=NONE
 #PBATCH END
 
+
 argProcess=65504 #nucleons
 for argEOS in 0 1 2 3 4; do
 for argPairing in 0 1 2 3 4 5; do
 for argMass in 1.0 1.2 1.4 1.6 1.8 2.0; do
-arggann=0
-arggapp=0
+arggapp=$arggann
 arggaee=0
 arggamm=0
 

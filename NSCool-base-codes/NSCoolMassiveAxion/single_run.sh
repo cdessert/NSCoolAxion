@@ -28,4 +28,5 @@ rm $folder/Temp_Try.dat
 cp -r Model_1/* $folder/.
 
 ./NSCool.out $argProcess $argEOS $argPairing $argMass $arggann $arggapp $arggaee $arggamm
+python python/NSCool_Likelihood.py $folder
 

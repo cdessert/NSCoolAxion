@@ -74,6 +74,10 @@ c *************************** e-Ion
         qaebremIon = 10.8d0 * rrho(i) * gaee**2.d0 / (4.d0*pi*1.d-26) 
      &           * T/1.d8 * FeIon
 
+        if( gaee.lt.0 ) then
+         qaebremIon = -qaebremIon
+        endif
+
 
 c      write(*,*) qaebremIon,T,FeIon,xState,GammaI
 

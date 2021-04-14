@@ -22,3 +22,4 @@
        real*8 :: gapp
        real*8 :: gaee
        real*8 :: gamm
+       common/Couplings/gann,gapp,gaee,gamm

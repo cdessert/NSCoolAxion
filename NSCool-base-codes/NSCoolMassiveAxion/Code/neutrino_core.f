@@ -236,6 +236,10 @@ c 1s0 n
       else
        PBF_s_n_epsilon = 0d0
       endif
+      
+      if( gann.lt.0 ) then
+       PBF_s_n_epsilon = -PBF_s_n_epsilon
+      endif
 
 c 3p2 A
       if(t .lt. tcn(i))then
@@ -247,6 +251,10 @@ c 3p2 A
      &                * (t/3d8)**5d0 * (IanPA/5.96d-3)
       else
        PBF_pA_epsilon = 0d0
+      endif
+
+      if( gann.lt.0 ) then
+       PBF_pA_epsilon = -PBF_pA_epsilon
       endif
 
 c 3p2 B
@@ -262,12 +270,20 @@ c 3p2 B
        PBF_pB_epsilon = 0d0
       endif
 
+      if( gann.lt.0 ) then
+       PBF_pB_epsilon = -PBF_pB_epsilon
+      endif
+
 c *************************** _do_nucelon
 c in erg/cm^3/s
       qabrem_nn = 1.827e12 * eann_star_factor * (t/1.d8)**6d0
      &            * (gann/1d-10)**2d0 * mstn(i)**2d0
       qabrem_nn_super = qabrem_nn * rbrem_nn
 
+      if( gann.lt.0 ) then
+       qabrem_nn = -qabrem_nn
+       qabrem_nn_super = -qabrem_nn_super
+      endif
 
 c ***************************
 
@@ -504,6 +520,10 @@ c 1s0 p
        PBF_s_p_epsilon = 0d0
       endif
 
+      if( gapp.lt.0 ) then
+       PBF_s_p_epsilon = -PBF_s_p_epsilon
+      endif
+
 c 1s0 n
       if(t .lt. tcn(i))then
        tau = t/tcn(i)
@@ -520,6 +540,11 @@ c 1s0 n
        PBF_s_n_epsilon = 0d0
       endif
 
+
+      if( gann.lt.0 ) then
+       PBF_s_n_epsilon = -PBF_s_n_epsilon
+      endif
+
 c 3p2 A
       if(t .lt. tcn(i))then
        tau = t/tcn(i)
@@ -530,6 +555,10 @@ c 3p2 A
      &                * (t/3d8)**5d0 * (IanPA/5.96d-3)
       else
        PBF_pA_epsilon = 0d0
+      endif
+
+      if( gann.lt.0 ) then
+       PBF_pA_epsilon = -PBF_pA_epsilon
       endif
 
 c 3p2 B
@@ -543,6 +572,10 @@ c 3p2 B
      &                * (t/3d8)**5d0 * (IanPB/5.96d-3)
       else
        PBF_pB_epsilon = 0d0
+      endif
+
+      if( gann.lt.0 ) then
+       PBF_pB_epsilon = -PBF_pB_epsilon
       endif
 
 
@@ -560,7 +593,20 @@ c in erg/cm^3/s
       qabrem_pp_super = qabrem_pp * rbrem_pp
       qabrem_np_super = qabrem_np * rbrem_np
 
+      if( gann.lt.0 ) then
+       qabrem_nn = -qabrem_nn 
+       qabrem_nn_super = -qabrem_nn_super
+      endif
 
+      if( gapp.lt.0 ) then
+       qabrem_pp = -qabrem_pp
+       qabrem_pp_super = -qabrem_pp_super
+      endif
+
+      if( gapp.lt.0 .or. gann.lt.0) then
+       qabrem_np = -qabrem_np 
+       qabrem_np_super = -qabrem_np_super
+      endif
 c *************************** leptons
 
       alphaEM = 1.d0/137.d0
@@ -602,6 +648,11 @@ c              rrho(i) * 4.31013e-18
      &         * rhoGeV * TGeV**4.d0 / me**2.d0 / mu * Fep
       qabrem_m = 3.168d62 * pi**2.d0 / 15.d0 * alphaEM**2.d0 * alpha_m 
      &         * rhoGeV * TGeV**4.d0 / mm**2.d0 / mu * Fem
+
+      if( gaee.lt.0 ) then
+       qabrem_e = -qabrem_e 
+       qabrem_m = -qabrem_m
+      endif
 
 c      write(*,*) qabrem_e, GammaI, xState, Fep, u
 
@@ -666,7 +717,8 @@ c ***************************
       if (IAND(pid_mp_core,ProcessID).gt.0) then
        qasync = qasync + qabrem_m
       endif
-
+      
+c      write(*,*)'coupling:',gann,gapp,gaee,gamm,qasync,qbrem_nucl
 
       return
 
