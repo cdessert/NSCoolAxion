@@ -651,6 +651,9 @@ c              rrho(i) * 4.31013e-18
 
       if( gaee.lt.0 ) then
        qabrem_e = -qabrem_e 
+      endif
+
+      if( gamm.lt.0 ) then
        qabrem_m = -qabrem_m
       endif
 
