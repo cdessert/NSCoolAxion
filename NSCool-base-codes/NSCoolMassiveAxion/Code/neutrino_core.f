@@ -620,8 +620,10 @@ c GeV
       rhoGeV = mu * star_kfp_core**3.d0 / 3.d0 / pi**2.d0
 c              rrho(i) * 4.31013e-18
       TGeV = t * 8.61733e-14
-      GammaI = 22.73 * 1.d6 / t * ( rrho(i)/1.d6 )**(1.d0/3.d0)
-      xState = LOG10( rrho(i) )
+
+      GammaI = 22.73*1.d6/t * ( rhoGeV/4.3103d-18 / 1.d6 )**(1.d0/3.d0)
+      xState = LOG10( rhoGeV/4.3103d-18 )
+
 
       if( xState.gt.11.4d0 ) then
        a = -6.47808d0
