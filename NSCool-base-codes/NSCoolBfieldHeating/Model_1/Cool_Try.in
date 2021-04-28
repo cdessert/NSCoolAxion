@@ -1,0 +1,20 @@
+  'NEW'
+BASIC MODEL FILES:
+  'EOS/Crust/Crust_EOS_Cat_HZD-NV.dat'
+  'EOS/APR_EOS_Cat.dat'
+  'TOV/Profile/Prof_APR_Cat_1.4.dat'
+OTHER MODEL FILES:
+  'I_Files/I_Struct_1.6e14-4.0e11-1e10_normal.dat'
+  'I_Files/I_Bound_Fe.dat'
+  'I_Files/I_Pairing_SFB-a-T73.dat'
+  'I_Files/I_Neutrino_1.dat'
+  'I_Files/I_Conduct_32.dat'
+  'I_Files/I_Heat_0.dat'
+  'I_Files/I_Bfield_0.dat'
+  'I_Files/I_Accretion_0.dat'
+OUTPUT FILES:
+  'Model_1/I.dat'
+  'Model_1/Teff_Try.dat'
+  'Model_1/Temp_Try.dat'
+  'Model_1/Star_Try.dat'
+

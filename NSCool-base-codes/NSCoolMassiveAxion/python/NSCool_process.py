@@ -74,10 +74,23 @@ class NScool:
 		self.lines_Teff = np.array(lines_Teff[26:])
 		self.Teff_times = np.zeros(len(self.lines_Teff))
 		self.Teff_Teffs = np.zeros(len(self.lines_Teff))
+		self.Teff_Lphots = np.zeros(len(self.lines_Teff))
+		self.Teff_Lnus = np.zeros(len(self.lines_Teff))
+		self.Teff_Lheats = np.zeros(len(self.lines_Teff))
+		self.Teff_Bfields = np.zeros(len(self.lines_Teff))
+		self.Teff_Tcentrals = np.zeros(len(self.lines_Teff))
 		for i in range(len(self.lines_Teff)):
 			lt = self.lines_Teff[i].split()
 			self.Teff_times[i] = float(lt[1])
 			self.Teff_Teffs[i] = float(lt[2])
+			self.Teff_Lphots[i] = float(lt[3])
+			self.Teff_Lnus[i] = float(lt[4])
+			self.Teff_Lheats[i] = float(lt[5])
+			try:
+				self.Teff_Bfields[i] = float(lt[6])
+				self.Teff_Tcentrals[i] = float(lt[7])
+			except IndexError:
+				continue
 
 		# star
 		it = 0

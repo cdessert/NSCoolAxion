@@ -1,0 +1,30 @@
+HEATING CONTROL:------------------------------------------
+0	i_heat_deep_crust
+0	i_heat_deposit
+0.d0	t_dep
+0.d0	del_t_dep
+0.d0	total_heat
+0	i_dep
+0	i_heat_convert
+0	MeV_neutron
+0	i_heat_vortex_creep
+0.0	j_44
+0	i_heat_joule
+0	i_heat_field_decay
+0       i_heat_cold1
+0       i_heat_cold2
+0       i_heat_cold3
+0       i_heat_cold4
+0       heat_cold1
+0       heat_cold2
+0       heat_cold3
+0       heat_cold4
+
+
+
+
+
+
+
+
+
