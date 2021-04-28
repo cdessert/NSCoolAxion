@@ -4,18 +4,19 @@ argProcess=$1
 argEOS=$2
 argPairing=$3
 argMass=$4
-arggann=$5
-arggapp=$6
-arggaee=$7
-arggamm=$8
+arglogBinit=$5
+arggann=$6
+arggapp=$7
+arggaee=$8
+arggamm=$9
 
 echo "Print All:"
-echo $argProcess $argEOS $argPairing $argMass $arggann $arggapp $arggaee $arggamm
+echo $argProcess $argEOS $argPairing $argMass $arglogBinit $arggann $arggapp $arggaee $arggamm
 echo "----------------------"
 
 folder=Runs/${argProcess}
 mkdir $folder
-folder=${folder}/${argEOS}_${argPairing}_${argMass}
+folder=${folder}/${argEOS}_${argPairing}_${argMass}_${arglogBinit}/
 mkdir $folder
 folder=${folder}/${arggann}_${arggapp}_${arggaee}_${arggamm}/
 mkdir  $folder
@@ -27,6 +28,6 @@ rm $folder/Teff_Try.dat
 rm $folder/Temp_Try.dat
 cp -r Model_1/* $folder/.
 
-./NSCool.out $argProcess $argEOS $argPairing $argMass $arggann $arggapp $arggaee $arggamm
+./NSCool.out $argProcess $argEOS $argPairing $argMass $arglogBinit $arggann $arggapp $arggaee $arggamm
 python python/NSCool_Likelihood.py $folder
 
