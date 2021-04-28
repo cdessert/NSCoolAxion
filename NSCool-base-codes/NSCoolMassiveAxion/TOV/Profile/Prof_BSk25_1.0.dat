@@ -1,0 +1,10 @@
+       6       2       1       1
+
+     EOS file :  Prof_BSk25_1.0.dat                                          
+
+  step        radius       baryon#       density        pressure       encl. mass            phi     encl. bar. mass 
+                (m)        (#/fm3)       (g/cm3)        (dyn/cm2)      (sol. mass)                     (sol. mass)   
+
+     0       0.000000            NaN   0.000000E+00    0.00000E+00   0.000000000E+00            NaN   0.000000000E+00
+     1     100.000001   0.000000E+00   0.000000E+00    0.00000E+00   0.000000000E+00            NaN   0.000000000E+00
+     2            NaN   0.000000E+00   0.000000E+00            NaN               NaN            NaN               NaN
