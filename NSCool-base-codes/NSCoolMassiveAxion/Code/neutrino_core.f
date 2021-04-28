@@ -677,7 +677,7 @@ c       write(6,*)gamm,Bfield_G,Temp_keV,pFermi_GeV,qasync
        qasync_o = -qasync_o
       end if
 
-      write(*,*)qasync_o
+c      write(*,*)qasync_o
 
      
 
