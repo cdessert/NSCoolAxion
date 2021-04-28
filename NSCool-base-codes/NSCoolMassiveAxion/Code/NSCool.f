@@ -290,31 +290,31 @@ c Process switch
       close(25)
       close(25)
 
-c      open(21,file='Bfield.txt')
-c      open(22,file='Temp.txt')
-c      open(23,file='pFermi.txt')
-c      open(24,file='Emissivity.txt')
-c      do h_i = 1,h_dimb
-c         do h_j = 1,h_dimp
-c            do h_k = 1,h_dimt
-c               read(21,*) h_bfield(h_i,h_j,h_k)
-c               read(22,*) h_temp(h_i,h_j,h_k)
-c               read(23,*) h_pfermi(h_i,h_j,h_k)
-c               read(24,*) h_emissiv(h_i,h_j,h_k)
-c            end do
-c         end do
-c      end do
-c      close(21)
-c      close(22)
-c      close(23)
-c      close(24)
+      open(21,file='MuonEmissivityTxts/ma0.00e+00/Bfield.txt')
+      open(22,file='MuonEmissivityTxts/ma0.00e+00/Temp.txt')
+      open(23,file='MuonEmissivityTxts/ma0.00e+00/pFermi.txt')
+      open(24,file='MuonEmissivityTxts/ma0.00e+00/Emissivity.txt')
+      do h_i = 1,h_dimb
+         do h_j = 1,h_dimp
+            do h_k = 1,h_dimt
+               read(21,*) h_bfield(h_i,h_j,h_k)
+               read(22,*) h_temp(h_i,h_j,h_k)
+               read(23,*) h_pfermi(h_i,h_j,h_k)
+               read(24,*) h_emissiv(h_i,h_j,h_k)
+            end do
+         end do
+      end do
+      close(21)
+      close(22)
+      close(23)
+      close(24)
 
-c      h_b0 = log10(h_bfield(1,1,1))
-c      h_b1 = log10(h_bfield(h_dimb,1,1))
-c      h_t0 = log10(h_temp(1,1,1))
-c      h_t1 = log10(h_temp(1,1,h_dimt))
-c      h_p0 = log10(h_pfermi(1,1,1))
-c      h_p1 = log10(h_pfermi(1,h_dimp,1))
+      h_b0 = log10(h_bfield(1,1,1))
+      h_b1 = log10(h_bfield(h_dimb,1,1))
+      h_t0 = log10(h_temp(1,1,1))
+      h_t1 = log10(h_temp(1,1,h_dimt))
+      h_p0 = log10(h_pfermi(1,1,1))
+      h_p1 = log10(h_pfermi(1,h_dimp,1))
 
       
 c      write(6,*)'1',h_dim,h_bfield,h_temp,h_pfermi,h_emissiv

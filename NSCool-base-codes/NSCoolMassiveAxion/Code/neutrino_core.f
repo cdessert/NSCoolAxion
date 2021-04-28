@@ -456,7 +456,6 @@ c      GeVtoem=3.155d62
 c      GtoG2=1.95d-20
 c      Bfie=4.41d13*GtoG2
 c      invfm2GeV=1.973d-1
-c      Bfield_G = 2.0d13
 c      gamm = 0d-9
      
 
@@ -663,20 +662,22 @@ c      write(*,*) qabrem_e, GammaI, xState, Fep, u
 
 c *************************** synchotron
  
-c      Temp_keV = t * K2keV
-c      pFermi_GeV = kfm(i) * fmG
-c      if ((Temp_keV>1).and.(Temp_keV<900)
-c     & .and.(pFermi_GeV>1d-3).and.(pFermi_GeV<3d-1)) then
-c       qasync_o = gamm*gamm*emissivity(Bfield_G, Temp_keV, pFermi_GeV)
+      Bfield_G = 6.8e13
+      Temp_keV = t * K2keV
+      pFermi_GeV = kfm(i) * fmG
+      if ((Temp_keV>1).and.(Temp_keV<900)
+     & .and.(pFermi_GeV>1d-3).and.(pFermi_GeV<3d-1)) then
+       qasync_o = gamm*gamm*emissivity(Bfield_G, Temp_keV, pFermi_GeV)
 c       write(6,*)gamm,Bfield_G,Temp_keV,pFermi_GeV,qasync
-c      else
-c       qasync_o=0d0
-c      end if
-c      if (gamm < 0) then
-c       qasync_o = -qasync_o
-c      end if
+      else
+       qasync_o=0d0
+      end if
 
+      if (gamm < 0) then
+       qasync_o = -qasync_o
+      end if
 
+      write(*,*)qasync_o
 
      
 
