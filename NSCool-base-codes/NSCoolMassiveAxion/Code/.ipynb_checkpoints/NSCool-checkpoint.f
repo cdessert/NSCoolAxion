@@ -38,6 +38,7 @@ c *********************************************************************
       parameter (pi=3.1415926535d0)
 
       INCLUDE 'size.inc.f'
+      INCLUDE 'pid.inc.f'
       INCLUDE 'rho_limits.inc.f'
       INCLUDE 'gamma_limits.inc.f'
       INCLUDE 'files.inc.f'
@@ -63,10 +64,11 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 c**** Input/Output:
 
+      character*128 folder
       character*90 filename
       character*79 model
       character*80  f_concryst
-      character*100 f_Bound,f_Pairing,f_Neutrino,f_Conduct,
+      character*128 f_Bound,f_Pairing,f_Neutrino,f_Conduct,
      x              f_Heat,f_Bfield,f_Accretion,f_Strange
       dimension tprint(0:50)
       common/print/pcore,model
@@ -146,6 +148,10 @@ c either when it is numerically solved (maxff1<chff1) or ratiol<mratl
 c Auxiliary variables:
       character*5 what
 
+c     Chris: Magnetic Field Evolution
+c     Initialize parameters
+      real*8 :: Bcurr,dBdt
+      common/bfield_values/Bcurr,dBdt
 
 c Muon cube
       integer :: h_i,h_j,h_k
@@ -163,31 +169,152 @@ c Muon cube
 c      real*8 :: test_emissivity
 c      real*8 :: test_Bfield, test_Temp, test_pfermi
 
-      open(21,file='Bfield.txt')
-      open(22,file='Temp.txt')
-      open(23,file='pFermi.txt')
-      open(24,file='Emissivity.txt')
-      do h_i = 1,h_dimb
-         do h_j = 1,h_dimp
-            do h_k = 1,h_dimt
-               read(21,*) h_bfield(h_i,h_j,h_k)
-               read(22,*) h_temp(h_i,h_j,h_k)
-               read(23,*) h_pfermi(h_i,h_j,h_k)
-               read(24,*) h_emissiv(h_i,h_j,h_k)
-            end do
-         end do
-      end do
-      close(21)
-      close(22)
-      close(23)
-      close(24)
 
-      h_b0 = log10(h_bfield(1,1,1))
-      h_b1 = log10(h_bfield(h_dimb,1,1))
-      h_t0 = log10(h_temp(1,1,1))
-      h_t1 = log10(h_temp(1,1,h_dimt))
-      h_p0 = log10(h_pfermi(1,1,1))
-      h_p1 = log10(h_pfermi(1,h_dimp,1))
+c PBF I
+      integer :: p_I
+      integer,parameter :: p_dimI = 1000
+      real*8,dimension(1:p_dimI) :: IA_x
+      real*8,dimension(1:p_dimI) :: IA_y
+      real*8,dimension(1:p_dimI) :: IB_x
+      real*8,dimension(1:p_dimI) :: IB_y
+      common/PBF_I/IA_x,IA_y,IB_x,IB_y
+
+
+c Process switch
+      character(len=64) :: argProcess
+      character(len=64) :: argEOS,argPairing,argMass,arglogBinit
+      character(len=64) :: arggann,arggapp,arggaee,arggamm
+      integer :: ProcessID
+      integer :: EOSID,PairingID
+
+      call getarg(1,argProcess)
+      call getarg(2,argEOS)
+      call getarg(3,argPairing)
+      call getarg(4,argMass)
+      call getarg(5,arglogBinit)
+      call getarg(6,arggann)
+      call getarg(7,arggapp)
+      call getarg(8,arggaee)
+      call getarg(9,arggamm)
+      read (argProcess,'(I64)') ProcessID
+      read (argEOS,'(I64)') EOSID
+      read (argPairing,'(I64)') PairingID
+      read (argMass,*) Mass
+      read (arglogBinit,*) logBinit
+      read (arggann,*) gann
+      read (arggapp,*) gapp
+      read (arggaee,*) gaee
+      read (arggamm,*) gamm
+
+      write(*,*) 'ID:',ProcessID,EOSID,PairingID
+      write(*,*) 'Mass:',Mass
+      write(*,*) 'logBinit:',logBinit
+      write(*,*) 'g_ann:',gann
+      write(*,*) 'g_app:',gapp
+      write(*,*) 'g_aee:',gaee
+      write(*,*) 'g_amm:',gamm
+
+      write(*,*) '-------------------------------'
+      write(*,*) 'The following axion processes will be switched on:'
+      if (ProcessID.eq.0) then
+       write(*,*) 'None'
+      endif
+      if (IAND(pid_synchotron,ProcessID).gt.0) then
+       write(*,*) 'synchotron radiation'
+      endif
+      if (IAND(pid_nn_core,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung nn (core)'
+      endif
+      if (IAND(pid_pp_core,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung pp (core)'
+      endif
+      if (IAND(pid_np_core,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung np (core)'
+      endif
+      if (IAND(pid_nn_inner_crust,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung nn (inner crust)'
+      endif
+      if (IAND(pid_nn_core_super,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung nn (core) with superfluidity'
+      endif
+      if (IAND(pid_pp_core_super,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung pp (core) with superfluidity'
+      endif
+      if (IAND(pid_np_core_super,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung np (core) with superfluidity'
+      endif
+      if (IAND(pid_nn_inner_crust_super,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung nn (inner crust) with superfluidity'
+      endif
+      if (IAND(pid_PBF_s_p_core,ProcessID).gt.0) then
+       write(*,*) 'PBF 1s0 p (core)'
+      endif
+      if (IAND(pid_PBF_s_n_core,ProcessID).gt.0) then
+       write(*,*) 'PBF 1s0 n (core)'
+      endif
+      if (IAND(pid_PBF_s_n_inner_crust,ProcessID).gt.0) then
+       write(*,*) 'PBF 1s0 n (inner_crust)'
+      endif
+      if (IAND(pid_PBF_pA_core,ProcessID).gt.0) then
+       write(*,*) 'PBF 3p2 A (core)'
+      endif
+       if (IAND(pid_PBF_pB_core,ProcessID).gt.0) then
+       write(*,*) 'PBF 3p2 B (core)'
+      endif
+      if (IAND(pid_PBF_pA_inner_crust,ProcessID).gt.0) then
+       write(*,*) 'PBF 3p2 A (inner crust)'
+      endif
+      if (IAND(pid_PBF_pB_inner_crust,ProcessID).gt.0) then
+       write(*,*) 'PBF 3p2 B (inner crust)'
+      endif
+      if (IAND(pid_mp_core,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung muon-p (core)'
+      endif
+      if (IAND(pid_ep_core,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung e-p (core)'
+      endif
+      if (IAND(pid_eI_crust,ProcessID).gt.0) then
+       write(*,*) 'bremsstrahlung e-Ion (crust)'
+      endif
+      write(*,*) '-------------------------------'
+
+
+      open(25,file='IpnA.txt')
+      open(26,file='IpnB.txt')
+      do p_I = 1,p_dimI
+       read(25,*) IA_x(p_I)
+       read(25,*) IA_y(p_I)
+       read(26,*) IB_x(p_I)
+       read(26,*) IB_y(p_I)
+      end do
+      close(25)
+      close(25)
+
+c      open(21,file='Bfield.txt')
+c      open(22,file='Temp.txt')
+c      open(23,file='pFermi.txt')
+c      open(24,file='Emissivity.txt')
+c      do h_i = 1,h_dimb
+c         do h_j = 1,h_dimp
+c            do h_k = 1,h_dimt
+c               read(21,*) h_bfield(h_i,h_j,h_k)
+c               read(22,*) h_temp(h_i,h_j,h_k)
+c               read(23,*) h_pfermi(h_i,h_j,h_k)
+c               read(24,*) h_emissiv(h_i,h_j,h_k)
+c            end do
+c         end do
+c      end do
+c      close(21)
+c      close(22)
+c      close(23)
+c      close(24)
+
+c      h_b0 = log10(h_bfield(1,1,1))
+c      h_b1 = log10(h_bfield(h_dimb,1,1))
+c      h_t0 = log10(h_temp(1,1,1))
+c      h_t1 = log10(h_temp(1,1,h_dimt))
+c      h_p0 = log10(h_pfermi(1,1,1))
+c      h_p1 = log10(h_pfermi(1,h_dimp,1))
 
       
 c      write(6,*)'1',h_dim,h_bfield,h_temp,h_pfermi,h_emissiv
@@ -254,7 +381,16 @@ c       read(5,*)filename
 c ***  Can add here the directory where "Cool_*.in" is:
 c       filename='Model_1/'//filename
 c ***  Or define it completely here: **********************************
-       filename='Model_1/Cool_Try.in'
+
+       folder='Runs/'//trim(argProcess)//'/'//trim(argEOS)//
+     1          '_'//trim(argPairing)//'_'//trim(argMass)//
+     2          '_'//trim(arglogBinit)//
+     3          '/'//trim(arggann)//'_'//trim(arggapp)//
+     4          '_'//trim(arggaee)//'_'//trim(arggamm)//'/'
+
+       filename=trim(folder)//'Cool_Try.in'
+
+
        write(6,*)'Using as input: ',filename
 c**********************************************************************
        open(unit=15,file=filename,status='old')
@@ -291,6 +427,46 @@ c *** OUTPUT FILES: ***************************************************
       read(15,*,end=9997,err=9997)f_Teff
       read(15,*,end=9997,err=9997)f_Temp
       read(15,*,end=9997,err=9997)f_Star
+
+      f_i    = trim(folder)//f_i
+      f_Teff = trim(folder)//f_Teff
+      f_Temp = trim(folder)//f_Temp
+      f_Star = trim(folder)//f_Star
+ 
+      select case (EOSID) 
+        case (0)
+          f_stareos = 'EOS/APR_EOS_Cat.dat'
+          f_profile = 'TOV/Profile/Prof_APR_Cat_'
+        case (1)
+          f_stareos = 'EOS/BSk22_test.dat'
+          f_profile = 'TOV/Profile/Prof_BSk22_'
+        case (2)
+          f_stareos = 'EOS/BSk24_test.dat'
+          f_profile = 'TOV/Profile/Prof_BSk24_'
+        case (3)
+          f_stareos = 'EOS/BSk25_test.dat'
+          f_profile = 'TOV/Profile/Prof_BSk25_'
+        case (4)
+          f_stareos = 'EOS/BSk26_test.dat'
+          f_profile = 'TOV/Profile/Prof_BSk26_'
+      end select
+      f_profile = trim(f_profile)//trim(argMass)//'.dat'
+
+      select case (PairingID)
+        case (0)
+          f_Pairing = 'I_Files/I_Pairing_0-0-0.dat'
+        case (1)
+          f_Pairing = 'I_Files/I_Pairing_SFB-0-0.dat'
+        case (2)
+          f_Pairing = 'I_Files/I_Pairing_SFB-0-T73.dat'
+        case (3)
+          f_Pairing = 'I_Files/I_Pairing_SFB-a-T73.dat'
+        case (4)
+          f_Pairing = 'I_Files/I_Pairing_SFB-b-T73.dat'
+        case (5)
+          f_Pairing = 'I_Files/I_Pairing_SFB-c-T73.dat'
+      end select
+
 c**********************************************************************
 c *** PRINT ON THE SCREEN THE FILES:
 c Notice: pscreen will be read from file "I.dat"
@@ -537,6 +713,20 @@ c look +++++++++++++++++++++++++++++++++++++++++++++
 c      dlum(imax)=dlum(imax-2)
 c ++++++++++++++++++++++++++++++++++++++++++++++++++
 
+c     Chris: Magnetic Field Evolution
+c     Calculate dBdt at this time step
+c     dtime is in seconds, see line 421 above, so dtime/year in years
+c     dBdt is in Gauss/s
+      tcenter=ntemp(1)/ephi(1)
+      if (istep==1) then
+        Bcurr=10**logBinit
+        dlogBdt=-1/(1.8d9/0.1)-1/(3d9*(tcenter/1d8)**2/(Bcurr/1d12)**2)
+        dBdt=Bcurr*dLogBdt
+      else
+        dlogBdt=-1/(1.8d9/0.1)-1/(3d9*(tcenter/1d8)**2/(Bcurr/1d12)**2)
+        dBdt=Bcurr*dLogBdt
+      end if
+
 c BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 c      INCLUDE 'Bfield/Bfield_3.inc.f'
 c BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
@@ -613,7 +803,7 @@ c *********************************************************************
        a=a_cell(i)
        a1=a_ion(i)
        z=z_ion(i)
-       call neutrino(i,t,time,d,a,z,qnu(i),
+       call neutrino(i,t,ProcessID,time,d,a,z,qnu(i),
      1   qeebrem(i),qnpb(i),qplasma(i),qsynch(i),qbubble(i),
      1   qpair(i),qphoto(i),qbrem_nn(i),
 c     2   qmurca_nucl(i),qbrem_nucl(i),qasync(i),qmurca_hyp(i),qbrem_hyp(i),
@@ -684,7 +874,8 @@ c *********************************************************************
        a=a_cell(i)
        a1=a_ion(i)
        z=z_ion(i)
-       call neutrino(i,t,time,d,a,z,qnu1(i),
+
+       call neutrino(i,t,ProcessID,time,d,a,z,qnu1(i),
      1          qn00,qn01,qn02,qn03,qn04,qn05,qn06,qn07,qn08,qn09,q10,
      2               qn11,qn12,qn13,qn14,qn15,qn16,qn17,qn18,qn19,q20,
      3               qn21,qn22,qn23,
@@ -1036,6 +1227,11 @@ c *********************************************************************
        orad(i)=rad(i)       
        obar(i)=bar(i)
 172   continue
+
+c     Chris: Magnetic Field Evolution
+c     Update the magnetic field strength for next time step
+      Bcurr=Bcurr+dBdt*dtime/year
+c      write(6,*)istep,Bcurr,dBdt,dtime,tcenter
 
 c BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 c      INCLUDE 'Bfield/Bfield_7.inc.f'

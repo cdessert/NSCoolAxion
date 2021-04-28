@@ -148,6 +148,10 @@ c either when it is numerically solved (maxff1<chff1) or ratiol<mratl
 c Auxiliary variables:
       character*5 what
 
+c     Chris: Magnetic Field Evolution
+c     Initialize parameters
+      real*8 :: Bcurr,dBdt
+      common/bfield_values/Bcurr,dBdt
 
 c Muon cube
       integer :: h_i,h_j,h_k
@@ -178,7 +182,7 @@ c PBF I
 
 c Process switch
       character(len=64) :: argProcess
-      character(len=64) :: argEOS,argPairing,argMass
+      character(len=64) :: argEOS,argPairing,argMass,arglogBinit
       character(len=64) :: arggann,arggapp,arggaee,arggamm
       integer :: ProcessID
       integer :: EOSID,PairingID
@@ -187,14 +191,16 @@ c Process switch
       call getarg(2,argEOS)
       call getarg(3,argPairing)
       call getarg(4,argMass)
-      call getarg(5,arggann)
-      call getarg(6,arggapp)
-      call getarg(7,arggaee)
-      call getarg(8,arggamm)
+      call getarg(5,arglogBinit)
+      call getarg(6,arggann)
+      call getarg(7,arggapp)
+      call getarg(8,arggaee)
+      call getarg(9,arggamm)
       read (argProcess,'(I64)') ProcessID
       read (argEOS,'(I64)') EOSID
       read (argPairing,'(I64)') PairingID
       read (argMass,*) Mass
+      read (arglogBinit,*) logBinit
       read (arggann,*) gann
       read (arggapp,*) gapp
       read (arggaee,*) gaee
@@ -202,6 +208,7 @@ c Process switch
 
       write(*,*) 'ID:',ProcessID,EOSID,PairingID
       write(*,*) 'Mass:',Mass
+      write(*,*) 'logBinit:',logBinit
       write(*,*) 'g_ann:',gann
       write(*,*) 'g_app:',gapp
       write(*,*) 'g_aee:',gaee
@@ -377,8 +384,9 @@ c ***  Or define it completely here: **********************************
 
        folder='Runs/'//trim(argProcess)//'/'//trim(argEOS)//
      1          '_'//trim(argPairing)//'_'//trim(argMass)//
-     2          '/'//trim(arggann)//'_'//trim(arggapp)//
-     3          '_'//trim(arggaee)//'_'//trim(arggamm)//'/'
+     2          '_'//trim(arglogBinit)//
+     3          '/'//trim(arggann)//'_'//trim(arggapp)//
+     4          '_'//trim(arggaee)//'_'//trim(arggamm)//'/'
 
        filename=trim(folder)//'Cool_Try.in'
 
@@ -704,6 +712,20 @@ c look +++++++++++++++++++++++++++++++++++++++++++++
       dlum(imax)=0.d0
 c      dlum(imax)=dlum(imax-2)
 c ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+c     Chris: Magnetic Field Evolution
+c     Calculate dBdt at this time step
+c     dtime is in seconds, see line 421 above, so dtime/year in years
+c     dBdt is in Gauss/s
+      tcenter=ntemp(1)/ephi(1)
+      if (istep==1) then
+        Bcurr=10**logBinit
+        dlogBdt=-1/(1.8d9/0.1)-1/(3d9*(tcenter/1d8)**2/(Bcurr/1d12)**2)
+        dBdt=Bcurr*dLogBdt
+      else
+        dlogBdt=-1/(1.8d9/0.1)-1/(3d9*(tcenter/1d8)**2/(Bcurr/1d12)**2)
+        dBdt=Bcurr*dLogBdt
+      end if
 
 c BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 c      INCLUDE 'Bfield/Bfield_3.inc.f'
@@ -1205,6 +1227,11 @@ c *********************************************************************
        orad(i)=rad(i)       
        obar(i)=bar(i)
 172   continue
+
+c     Chris: Magnetic Field Evolution
+c     Update the magnetic field strength for next time step
+      Bcurr=Bcurr+dBdt*dtime/year
+c      write(6,*)istep,Bcurr,dBdt,dtime,tcenter
 
 c BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 c      INCLUDE 'Bfield/Bfield_7.inc.f'
