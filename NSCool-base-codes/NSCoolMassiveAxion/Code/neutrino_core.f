@@ -662,7 +662,7 @@ c      write(*,*) qabrem_e, GammaI, xState, Fep, u
 
 c *************************** synchotron
  
-      Bfield_G = 6.8e13
+      Bfield_G = 6.8d13
       Temp_keV = t * K2keV
       pFermi_GeV = kfm(i) * fmG
       if ((Temp_keV>1).and.(Temp_keV<900)
@@ -673,11 +673,10 @@ c       write(6,*)gamm,Bfield_G,Temp_keV,pFermi_GeV,qasync
        qasync_o=0d0
       end if
 
-      if (gamm < 0) then
+      if (gamm.lt.0) then
        qasync_o = -qasync_o
       end if
 
-c      write(*,*)qasync_o
 
      
 
@@ -685,7 +684,7 @@ c ***************************
       qasync = 0d0
       
       if (IAND(pid_synchotron,ProcessID).gt.0) then
-       qasync = qasync + qasync_0
+       qasync = qasync + qasync_o
       endif
       if (IAND(pid_nn_core,ProcessID).gt.0) then
        qasync = qasync + qabrem_nn 
@@ -725,6 +724,19 @@ c ***************************
       endif
       
 c      write(*,*)'coupling:',gann,gapp,gaee,gamm,qasync,qbrem_nucl
+
+c      if ((Temp_keV>1).and.(Temp_keV<900)
+c     & .and.(pFermi_GeV>1d-3).and.(pFermi_GeV<3d-1)) then
+c     
+c        write(*,*)'after:',qasync,qasync_o,
+c     &     emissivity(Bfield_G, Temp_keV, pFermi_GeV)
+c
+c      else
+c        write(*,*)'after:',qasync,qasync_o
+c      endif
+
+
+
 
       return
 
