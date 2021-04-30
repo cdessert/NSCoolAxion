@@ -661,8 +661,17 @@ c              rrho(i) * 4.31013e-18
 c      write(*,*) qabrem_e, GammaI, xState, Fep, u
 
 c *************************** synchotron
- 
-      Bfield_G = 6.8d13
+      Bfield_G = 0d0
+      if (IAND(pid_B1,ProcessID).gt.0) then
+       Bfield_G = 6.8d13
+      endif
+      if (IAND(pid_B2,ProcessID).gt.0) then
+       Bfield_G = 2.9d13
+      endif
+      if (IAND(pid_B3,ProcessID).gt.0) then
+       Bfield_G = 2.0d13
+      endif
+
       Temp_keV = t * K2keV
       pFermi_GeV = kfm(i) * fmG
       if ((Temp_keV>1).and.(Temp_keV<900)

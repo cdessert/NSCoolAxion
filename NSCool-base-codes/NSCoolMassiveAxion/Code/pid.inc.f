@@ -17,6 +17,10 @@
        integer,parameter :: pid_mp_core=65536
        integer,parameter :: pid_ep_core=131072
        integer,parameter :: pid_eI_crust=262144
+       integer,parameter :: pid_B1=524288
+       integer,parameter :: pid_B2=1048576
+       integer,parameter :: pid_B3=2097152
+
        
        real*8 :: gann
        real*8 :: gapp
