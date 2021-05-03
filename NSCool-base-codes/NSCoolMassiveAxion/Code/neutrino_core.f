@@ -237,7 +237,7 @@ c 1s0 n
        PBF_s_n_epsilon = 0d0
       endif
       
-      if( gann.lt.0 ) then
+      if (IAND(pid_negG,ProcessID).gt.0) then
        PBF_s_n_epsilon = -PBF_s_n_epsilon
       endif
 
@@ -253,7 +253,7 @@ c 3p2 A
        PBF_pA_epsilon = 0d0
       endif
 
-      if( gann.lt.0 ) then
+      if (IAND(pid_negG,ProcessID).gt.0) then
        PBF_pA_epsilon = -PBF_pA_epsilon
       endif
 
@@ -270,7 +270,7 @@ c 3p2 B
        PBF_pB_epsilon = 0d0
       endif
 
-      if( gann.lt.0 ) then
+      if (IAND(pid_negG,ProcessID).gt.0) then
        PBF_pB_epsilon = -PBF_pB_epsilon
       endif
 
@@ -280,7 +280,7 @@ c in erg/cm^3/s
      &            * (gann/1d-10)**2d0 * mstn(i)**2d0
       qabrem_nn_super = qabrem_nn * rbrem_nn
 
-      if( gann.lt.0 ) then
+      if (IAND(pid_negG,ProcessID).gt.0) then
        qabrem_nn = -qabrem_nn
        qabrem_nn_super = -qabrem_nn_super
       endif
@@ -519,7 +519,7 @@ c 1s0 p
        PBF_s_p_epsilon = 0d0
       endif
 
-      if( gapp.lt.0 ) then
+      if (IAND(pid_negG,ProcessID).gt.0) then
        PBF_s_p_epsilon = -PBF_s_p_epsilon
       endif
 
@@ -540,7 +540,7 @@ c 1s0 n
       endif
 
 
-      if( gann.lt.0 ) then
+      if (IAND(pid_negG,ProcessID).gt.0) then
        PBF_s_n_epsilon = -PBF_s_n_epsilon
       endif
 
@@ -556,7 +556,7 @@ c 3p2 A
        PBF_pA_epsilon = 0d0
       endif
 
-      if( gann.lt.0 ) then
+      if (IAND(pid_negG,ProcessID).gt.0) then
        PBF_pA_epsilon = -PBF_pA_epsilon
       endif
 
@@ -573,7 +573,7 @@ c 3p2 B
        PBF_pB_epsilon = 0d0
       endif
 
-      if( gann.lt.0 ) then
+      if (IAND(pid_negG,ProcessID).gt.0) then
        PBF_pB_epsilon = -PBF_pB_epsilon
       endif
 
@@ -592,17 +592,17 @@ c in erg/cm^3/s
       qabrem_pp_super = qabrem_pp * rbrem_pp
       qabrem_np_super = qabrem_np * rbrem_np
 
-      if( gann.lt.0 ) then
+      if (IAND(pid_negG,ProcessID).gt.0) then
        qabrem_nn = -qabrem_nn 
        qabrem_nn_super = -qabrem_nn_super
       endif
 
-      if( gapp.lt.0 ) then
+      if (IAND(pid_negG,ProcessID).gt.0) then
        qabrem_pp = -qabrem_pp
        qabrem_pp_super = -qabrem_pp_super
       endif
 
-      if( gapp.lt.0 .or. gann.lt.0) then
+      if (IAND(pid_negG,ProcessID).gt.0) then
        qabrem_np = -qabrem_np 
        qabrem_np_super = -qabrem_np_super
       endif
