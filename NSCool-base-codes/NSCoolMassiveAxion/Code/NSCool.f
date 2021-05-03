@@ -153,6 +153,8 @@ c     Initialize parameters
       real*8 :: Bcurr,dBdt
       common/bfield_values/Bcurr,dBdt
 
+      real*8 :: buf1,buf2
+
 c Muon cube
       integer :: h_i,h_j,h_k
       integer,parameter :: h_dimb = 3
@@ -319,6 +321,13 @@ c Process switch
       
 c      write(6,*)'1',h_dim,h_bfield,h_temp,h_pfermi,h_emissiv
 c      write(6,*)'2',h_b0,h_b1,h_t0,h_t1,h_p0,h_p1
+
+      open(6128,file='F_profile.dat')
+      do h_i = 1,111
+         read(6128,*) buf1,buf2,F_FSA(h_i)
+      end do
+      close(6128)
+
 
 c ****************** Example for how to get the emissivities
 c ****************** Note this seg faults if out of range

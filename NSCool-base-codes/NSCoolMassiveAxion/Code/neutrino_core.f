@@ -608,57 +608,76 @@ c in erg/cm^3/s
       endif
 c *************************** leptons
 
-      alphaEM = 1.d0/137.d0
-      alpha_e = gaee**2.d0/(4.d0*pi)
-      alpha_m = gamm**2.d0/(4.d0*pi)
+c      alphaEM = 1.d0/137.d0
+c      alpha_e = gaee**2.d0/(4.d0*pi)
+c      alpha_m = gamm**2.d0/(4.d0*pi)
 
 c GeV
-      me = 5.11e-4
-      mm = 0.105658d0
-      mu = 0.9315d0
-      rhoGeV = mu * star_kfp_core**3.d0 / 3.d0 / pi**2.d0
+c      me = 5.11e-4
+c      mm = 0.105658d0
+c      mu = 0.9315d0
+c      rhoGeV = mu * star_kfp_core**3.d0 / 3.d0 / pi**2.d0
 c              rrho(i) * 4.31013e-18
+c      TGeV = t * 8.61733e-14
+
+c      GammaI = 22.73*1.d6/t * ( rhoGeV/4.3103d-18 / 1.d6 )**(1.d0/3.d0)
+c      xState = LOG10( rhoGeV/4.3103d-18 )
+
+
+c      if( xState.gt.11.4d0 ) then
+c       a = -6.47808d0
+c       b = 0.068645d0
+c       c = -0.000252677d0
+c      else
+c       a = 0.21946d0
+c       b = 0.00287263d0
+c       c = -0.000142016d0
+c      endif
+c
+c      if( GammaI.gt.178 ) then
+c       u = 0.488049d0 + 1.25585d0*GammaI/1.d3 - 
+c     &     0.743902d0*(GammaI/1.d3)**(2.d0)
+c      else
+c       u = 0.672409d0 + 0.182774d0*GammaI/1.d3 +
+c     &     0.144817d0*(GammaI/1.d3)**(2.d0)
+c      endif
+c
+c      Fep = 10.d0**( a + b*xState**2.d0 + c*xState**4.d0 - 1.d0+u )
+c      Fem = Fep * mm**2.d0 / me**2.d0
+c
+c      qabrem_e = 3.168d62 * pi**2.d0 / 15.d0 * alphaEM**2.d0 * alpha_e 
+c     &         * rhoGeV * TGeV**4.d0 / me**2.d0 / mu * Fep
+c      qabrem_m = 3.168d62 * pi**2.d0 / 15.d0 * alphaEM**2.d0 * alpha_m 
+c     &         * rhoGeV * TGeV**4.d0 / mm**2.d0 / mu * Fem
+c
+c      if( gaee.lt.0 ) then
+c       qabrem_e = -qabrem_e 
+c      endif
+
+c      if( gamm.lt.0 ) then
+c       qabrem_m = -qabrem_m
+c      endif
+
+      alphaEM = 1.d0/137.d0
+      alpha_m = gamm**2.d0/(4.d0*pi)
+      mm = 0.105658d0
+      mp = 0.93827d0
+      GeV5toergcms = 3.168d62
+
       TGeV = t * 8.61733e-14
+      pm = kfm(i) * fmG
+      Em2 = pm*pm + mm*mm 
 
-      GammaI = 22.73*1.d6/t * ( rhoGeV/4.3103d-18 / 1.d6 )**(1.d0/3.d0)
-      xState = LOG10( rhoGeV/4.3103d-18 )
+      qabrem_m = 992d0/945d0 * pi**4d0 * alpha_m * alphaEM**2d0 
+     &         * mp**2d0 * TGeV**6d0 / star_kfp_core / Em2
+     &         * F_FSA(i) * GeV5toergcms
 
-
-      if( xState.gt.11.4d0 ) then
-       a = -6.47808d0
-       b = 0.068645d0
-       c = -0.000252677d0
-      else
-       a = 0.21946d0
-       b = 0.00287263d0
-       c = -0.000142016d0
-      endif
-
-      if( GammaI.gt.178 ) then
-       u = 0.488049d0 + 1.25585d0*GammaI/1.d3 - 
-     &     0.743902d0*(GammaI/1.d3)**(2.d0)
-      else
-       u = 0.672409d0 + 0.182774d0*GammaI/1.d3 +
-     &     0.144817d0*(GammaI/1.d3)**(2.d0)
-      endif
-
-      Fep = 10.d0**( a + b*xState**2.d0 + c*xState**4.d0 - 1.d0+u )
-      Fem = Fep * mm**2.d0 / me**2.d0
-
-      qabrem_e = 3.168d62 * pi**2.d0 / 15.d0 * alphaEM**2.d0 * alpha_e 
-     &         * rhoGeV * TGeV**4.d0 / me**2.d0 / mu * Fep
-      qabrem_m = 3.168d62 * pi**2.d0 / 15.d0 * alphaEM**2.d0 * alpha_m 
-     &         * rhoGeV * TGeV**4.d0 / mm**2.d0 / mu * Fem
-
-      if( gaee.lt.0 ) then
-       qabrem_e = -qabrem_e 
-      endif
-
+     
       if( gamm.lt.0 ) then
        qabrem_m = -qabrem_m
       endif
 
-c      write(*,*) qabrem_e, GammaI, xState, Fep, u
+c      write(*,*) qabrem_m,F_FSA(i),i
 
 c *************************** synchotron
       Bfield_G = 0d0
