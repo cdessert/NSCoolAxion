@@ -21,6 +21,7 @@
        integer,parameter :: pid_B2=1048576
        integer,parameter :: pid_B3=2097152
        integer,parameter :: pid_negG=4194304
+       integer,parameter :: pid_picond=8388608
 
        
        real*8 :: gann

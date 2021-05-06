@@ -439,9 +439,15 @@ c **** effect of superfluidity :
 
       qbrem_nucl=qbrem_nn+qbrem_np+qbrem_pp
 
+c *************************** pion condensate - neutrino losses
+c For consistency in the cooling
 
+      A2 = 0.1
+      qbrem_picond = 1.09d23 * (t/1.0d9)**6d0 * (A2/0.1)
 
-
+      if (IAND(pid_picond,ProcessID).gt.0) then
+       qbrem_nucl = qbrem_nucl + qbrem_picond
+      endif
 
 
 
@@ -705,8 +711,12 @@ c       write(6,*)gamm,Bfield_G,Temp_keV,pFermi_GeV,qasync
        qasync_o = -qasync_o
       end if
 
+c *************************** pion condensate
 
-     
+      gtilde_A = 0.54d0
+      alpha_a = (g_c - gtilde_A*h_c)**2d0/(16d0*pi)
+      A2 = 0.1
+      qabrem_picond = 1.03d44 * (t/1.0d9)**4d0 * A2 * alpha_a
 
 c ***************************
       qasync = 0d0
@@ -749,6 +759,9 @@ c ***************************
       endif
       if (IAND(pid_mp_core,ProcessID).gt.0) then
        qasync = qasync + qabrem_m
+      endif
+      if (IAND(pid_picond,ProcessID).gt.0) then
+       qasync = qasync + qabrem_picond
       endif
       
 c      write(*,*)'coupling:',gann,gapp,gaee,gamm,qasync,qbrem_nucl

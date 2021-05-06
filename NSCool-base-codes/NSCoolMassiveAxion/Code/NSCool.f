@@ -278,6 +278,9 @@ c Process switch
       if (IAND(pid_eI_crust,ProcessID).gt.0) then
        write(*,*) 'bremsstrahlung e-Ion (crust)'
       endif
+      if (IAND(pid_picond,ProcessID).gt.0) then
+       write(*,*) 'pion condensate (core, update to inner core)'
+      endif
       write(*,*) '-------------------------------'
 
 
