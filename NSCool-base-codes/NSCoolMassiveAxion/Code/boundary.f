@@ -21,10 +21,61 @@ c           Ts1 and Ts2 ARE red-shifted !
          fteff=fteff_field_iron(Tb,bfield)
         else if (ifteff.eq.5) then
          fteff=fteff_ZARho(Tb,Z,A,Rho)
+        else if (ifteff.eq.6) then
+         fteff=fteff_Beznogov(Tb)
         end if
         if (debug.ge.1.) print *,'Done'
       return
        end
+c *********************************************************************
+c *********************************************************************
+
+      function fteff_Beznogov(Tb)
+
+c This is the Beznogov, Potekhin & Yakovlev 1604.00538
+c boundary condition for a H-He, He-C, or C-Fe combined envelope.
+c They give Tb(Ts) analytically, so we have generated curves
+c and inverted them. This code reads them from the "boundary" folder
+c and reads off the numerical relation. 
+c Todo: update to interpolation instead of nearest neighbor.
+c Note: The C-Fe curves have a typo in the paper, so it is not
+c possible to use at this time.
+
+c WARNING : Tb must be the local value, not the redshifted one !
+     
+      implicit real*8 (a-h,k-z)
+      integer indlog10tb_lo,indlog10tb_hi
+      real indlog10tb
+      integer,parameter :: t_dimt = 10000
+      real*8,dimension(1:t_dimt) :: t_log10tb
+      real*8,dimension(1:t_dimt) :: t_log10ts
+      real*8 :: t_log10tb0,t_log10tb1
+c      common/gravity/gs14,compactness
+      common/tbts_tables/t_log10tb,t_log10ts,t_log10tb0,t_log10tb1
+      save print
+
+      if (print.eq.1.) goto 10
+       print *,'-----------------------------------------------------'
+       print *,'Using BPY boundary condition'
+       print *,'-----------------------------------------------------'
+       print=1.
+ 10   continue
+
+      log10tb = log10(tb)
+      indlog10tba = int((log10tb-t_log10tb0)/
+     1                 (t_log10tb1-t_log10tb0)*t_dimt + 1.5)
+      log10tba = t_log10tb(indlog10tba)
+      log10tbb = t_log10tb(indlog10tba + 1)
+      log10tsa = t_log10ts(indlog10tba)
+      log10tsb = t_log10ts(indlog10tba + 1)
+      slope = (log10tsb-log10tsa)/(log10tbb-log10tba)
+      log10ts = log10tsa + (log10tb-log10tba)*slope
+      
+c      write(6,*)indlog10tb,t_log10ts(indlog10tb)
+      fteff_Beznogov = 10**log10ts
+
+      end
+
 c *********************************************************************
 c *********************************************************************
 

@@ -138,7 +138,6 @@ c *** NN-BREMSTRAHLUNG in the inner crust:
       if ((rho.lt.rhocore).and.(rho.ge.rhodrip)) then
          call nubrem_crust_nn(i,t,v_ion(i),qbrem_nn,qasync,ProcessID)
          qbrem_nn=qbrem_nn + qasync
-         qasync=0.d0
       else
          qbrem_nn=0.d0
       end if
@@ -149,7 +148,8 @@ c *** URCA et al. PROCESSES:
             qmurca_nucl=qmurca_nucl*(1.d0+murca_increase)
             qmurca_nucl=qmurca_nucl*fhad(i)
 
-            call nubrem_nucl(i,t,time,qbrem_nucl,qasync,ProcessID)
+            call nubrem_nucl(i,t,time,qbrem_nucl,
+     1                       qasync,ProcessID,rho,q_picond)
 c              ,h_dim,
 c     1        h_bfield,h_temp,h_pfermi,h_emissivity,h_b0,h_b1,
 c     2        h_t0,h_t1,h_p0,h_p1)
@@ -161,7 +161,7 @@ c            print *,"fhad(i) = ",fhad(i)
 
             qbrem_nucl=qbrem_nucl*(1.d0+murca_increase)
             qbrem_nucl=qbrem_nucl*fhad(i)
-            qbrem_nucl=qbrem_nucl+qasync
+            qbrem_nucl=qbrem_nucl+q_picond+qasync
  
             call numurca_hyp(i,t,qmurca_hyp)
             qmurca_hyp=qmurca_hyp*fhad(i)
@@ -269,6 +269,8 @@ c *** ADDING EVERYTHING:
      4   qfast+
      5   qdurca_q+qmurca_q+qstrange+
      6   qpbf_n1s0+qpbf_n3p2+qpbf_p1s0+qpbf_q
+      qatot = qasync + qasync_crust
+      qpi = q_picond
 c*****
       if (debug.ge.2.) print *,'Exiting subroutine `neutrino'' '
       return

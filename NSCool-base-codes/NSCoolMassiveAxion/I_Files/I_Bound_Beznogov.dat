@@ -1,0 +1,7 @@
+ENVELOPE MODEL & BOUNDARY CONDITION:----------------------
+6	IFTEFF   (0=use table, 10,11=magnetar with Fe and Acc)
+0.	ETA (for accreted env., i.e., IFTEFF=3)
+3.	MAG_COEFF (for magnetars, i.e., IFTEFF=10,11)
+0.0	TB_ACC0
+'none-at-all.nut'
+

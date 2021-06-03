@@ -317,7 +317,8 @@ c **** Reduction from ion's volume:
 c**********************************************************************
 c**********************************************************************
 
-      subroutine nubrem_nucl(i,t,time,qbrem_nucl,qasync,ProcessID)
+      subroutine nubrem_nucl(i,t,time,qbrem_nucl,
+     1                       qasync,ProcessID,rho,q_picond)
 
 c **** checked partially on March 30, 1993
 
@@ -375,6 +376,15 @@ c Brem_np:  n+p -> n+p+2nu
 c Brem_pp:  p+p -> p+p+2nu
       rbrem_pp_n3p2B(u)=1.0  ! Not affected by neutron pairing !
 c ***************************
+c ****** durca / pi-condensate*********************
+      u_1s0pi(t)=dsqrt(1.d0-t)*(1.456d0-0.157d0/dsqrt(t)+1.764d0/t)
+      r_1s0pi(u)=(0.2312d0+dsqrt(0.7688d0**2+(0.1438d0*u)**2))**5.5d0*
+     1         fexp(3.427d0-dsqrt(3.427d0**2+u**2))
+
+      u_3p2Bpi(t)=dsqrt(1.-t)*(5.596d0+8.424d0/t)
+      r_3p2Bpi(u)=(0.2546d0+dsqrt(0.7454d0**2+(0.01811d0*u)**2))**5*
+     1         fexp(2.701d0-dsqrt(2.701d0**2+u**2/(16.d0*pi)))
+c ***************************
 c ****** murca : **********************************************
       n_nu=3.d0    ! Number of neutrino famillies !
 c Brem_nn:  n+n -> n+n+2nu
@@ -392,6 +402,7 @@ c Brem_pp:  p+p -> p+p+2nu
       beta_pp=0.7d0
       qbrem_pp=n_nu * 7.4d19 *       mstp(i)**4      * 
      1         (kfp(i)/1.68d0) * alpha_pp * beta_pp * (t/1.d9)**8
+
    
 c *************************** superfluidity
       if(t .lt. tcn(i))then
@@ -442,12 +453,56 @@ c **** effect of superfluidity :
 c *************************** pion condensate - neutrino losses
 c For consistency in the cooling
 
-      A2 = 0.1
-      qbrem_picond = 1.09d23 * (t/1.0d9)**6d0 * (A2/0.1)
+      fmG=1.973d-1
+      K2keV=8.617d-8
+      Temp_keV = t * K2keV
+      gcm3_to_fm3 = 1/(1.675d15)
+      rhofm = rho * gcm3_to_fm3
 
-      if (IAND(pid_picond,ProcessID).gt.0) then
-       qbrem_nucl = qbrem_nucl + qbrem_picond
+      emiss_pic_cond_strong = 0
+      emiss_piopic_cond_strong = 0
+      emiss_pic_cond_weak = 0
+      emiss_piopic_cond_weak = 0
+      
+        
+      q_pic_cond = 1d25*(t/1d9)**6d0*emiss_pic_cond_weak
+      q_piopic_cond = 1d25*(t/1d9)**6d0*emiss_piopic_cond_weak
+      q_picond = q_pic_cond + q_piopic_cond
+      
+      if( (t.lt.tcp(i)) .and. (t.lt.tcn(i)) )then
+       if (i.ge.isf) then 
+        un=u_1s0pi(t/tcn(i))
+        rn=r_1s0pi(un)
+       else
+        un=u_3p2Bpi(t/tcn(i))
+        rn=r_3p2Bpi(un)
+       end if
+       up=u_1s0pi(t/tcp(i))
+       rp=r_1s0pi(up)
+       r=min(rn,rp)
+      else if(t .lt. tcn(i)) then
+       if (i.ge.isf) then 
+        u=u_1s0pi(t/tcn(i))
+        r=r_1s0pi(u)
+       else
+        u=u_3p2Bpi(t/tcn(i))
+        r=r_3p2Bpi(u)
+       end if
+      else if(t .lt. tcp(i))then
+       u=u_1s0pi(t/tcp(i))
+       r=r_1s0pi(u)
+      else
+       r=1.d0
+      end if
+
+      if ((IAND(pid_picond,ProcessID).gt.0)) then
+        q_picond = r*q_picond
+      else
+        q_picond = 0
       endif
+      if (i==1) then
+c      write(6,*)r,q_picond
+      end if
 
 
 
@@ -470,10 +525,8 @@ c all in GeV
       g_c = gapp + gann
       h_c = gapp - gann
 
-      fmG=1.973d-1
       m_pi = 0.140d0
       m_n = 0.939d0
-      K2keV=8.617d-8
       star_kfn_core = kfn(i) * fmG
       star_kfp_core = kfp(i) * fmG
 
@@ -697,7 +750,6 @@ c *************************** synchotron
        Bfield_G = 2.0d13
       endif
 
-      Temp_keV = t * K2keV
       pFermi_GeV = kfm(i) * fmG
       if ((Temp_keV>1).and.(Temp_keV<900)
      & .and.(pFermi_GeV>1d-3).and.(pFermi_GeV<3d-1)) then
@@ -714,9 +766,28 @@ c       write(6,*)gamm,Bfield_G,Temp_keV,pFermi_GeV,qasync
 c *************************** pion condensate
 
       gtilde_A = 0.54d0
+      g_A = 1.25d0
       alpha_a = (g_c - gtilde_A*h_c)**2d0/(16d0*pi)
-      A2 = 0.1
-      qabrem_picond = 1.03d44 * (t/1.0d9)**4d0 * A2 * alpha_a
+      k_c = 0.410d0
+      mu_pi = 0.410d0
+      
+c      qa_picond = (g_c - gtilde_A*h_c)**2d0
+c     &  * Temp_keV**4d0 * (A**2d0/0.1)
+c     &  * kpi/(1.44+kpi**2d0)**2d0
+c     &  * 2.2899d34
+
+c      Andrew's Ratio
+      r_pi = 2.0d10 * (h_c**2d0 + g_A**2/3d0*(g_c**2d0+
+     1       g_A**2d0*h_c**2d0/4d0)*(k_c/mu_pi)**2d0)*
+     2       (mu_pi/m_n)**-2d0*mstn(i)**-1d0*mstp(i)
+      qa_picond = q_picond*r_pi
+     
+c      if (pi_on==1) then
+c        write(6,*) "Pion condensate on",qa_picond,g_c,
+c     &   gtilde_A,h_c,Temp_keV,A,kpi
+c        write(6,*)qa_picond,kpi,fmG
+c       end if
+
 
 c ***************************
       qasync = 0d0
@@ -761,7 +832,7 @@ c ***************************
        qasync = qasync + qabrem_m
       endif
       if (IAND(pid_picond,ProcessID).gt.0) then
-       qasync = qasync + qabrem_picond
+       qasync = qasync + qa_picond
       endif
       
 c      write(*,*)'coupling:',gann,gapp,gaee,gamm,qasync,qbrem_nucl

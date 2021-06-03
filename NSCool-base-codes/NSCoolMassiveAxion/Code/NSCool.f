@@ -148,12 +148,23 @@ c either when it is numerically solved (maxff1<chff1) or ratiol<mratl
 c Auxiliary variables:
       character*5 what
 
-c     Chris: Magnetic Field Evolution
-c     Initialize parameters
+c Magnetic Field Evolution
       real*8 :: Bcurr,dBdt
       common/bfield_values/Bcurr,dBdt
 
+c F profile
       real*8 :: buf1,buf2
+
+c Tb(Ts) relation
+      integer :: t_I
+      integer,parameter :: t_dimt = 10000
+      real*8,dimension(1:t_dimt) :: t_log10tb
+      real*8,dimension(1:t_dimt) :: t_log10ts
+      real*8 :: t_log10tb0,t_log10tb1
+      common/tbts_tables/t_log10tb,t_log10ts,t_log10tb0,t_log10tb1
+
+c      real*8 :: test_emissivity
+c      real*8 :: test_Bfield, test_Temp, test_pfermi
 
 c Muon cube
       integer :: h_i,h_j,h_k
@@ -184,33 +195,39 @@ c PBF I
 
 c Process switch
       character(len=64) :: argProcess
-      character(len=64) :: argEOS,argPairing,argMass,arglogBinit
+      character(len=64) :: argEOS,argPairing,argMass
+      character(len=64) :: arglogBinit,argComp,arglogDeltaM
       character(len=64) :: arggann,arggapp,arggaee,arggamm
       integer :: ProcessID
-      integer :: EOSID,PairingID
+      integer :: EOSID,PairingID,CompID
 
       call getarg(1,argProcess)
       call getarg(2,argEOS)
       call getarg(3,argPairing)
       call getarg(4,argMass)
       call getarg(5,arglogBinit)
-      call getarg(6,arggann)
-      call getarg(7,arggapp)
-      call getarg(8,arggaee)
-      call getarg(9,arggamm)
+      call getarg(6,argComp)
+      call getarg(7,arglogDeltaM)
+      call getarg(8,arggann)
+      call getarg(9,arggapp)
+      call getarg(10,arggaee)
+      call getarg(11,arggamm)
       read (argProcess,'(I64)') ProcessID
       read (argEOS,'(I64)') EOSID
       read (argPairing,'(I64)') PairingID
       read (argMass,*) Mass
       read (arglogBinit,*) logBinit
+      read (argComp,'(I64)') CompID
+      read (arglogDeltaM,*) logDeltaM
       read (arggann,*) gann
       read (arggapp,*) gapp
       read (arggaee,*) gaee
       read (arggamm,*) gamm
 
-      write(*,*) 'ID:',ProcessID,EOSID,PairingID
+      write(*,*) 'ID:',ProcessID,EOSID,PairingID,CompID
       write(*,*) 'Mass:',Mass
       write(*,*) 'logBinit:',logBinit
+      write(*,*) 'logDeltaM:',logDeltaM
       write(*,*) 'g_ann:',gann
       write(*,*) 'g_app:',gapp
       write(*,*) 'g_aee:',gaee
@@ -279,7 +296,7 @@ c Process switch
        write(*,*) 'bremsstrahlung e-Ion (crust)'
       endif
       if (IAND(pid_picond,ProcessID).gt.0) then
-       write(*,*) 'pion condensate (core, update to inner core)'
+       write(*,*) 'pion condensate (inner core)'
       endif
       write(*,*) '-------------------------------'
 
@@ -293,7 +310,20 @@ c Process switch
        read(26,*) IB_y(p_I)
       end do
       close(25)
-      close(25)
+      close(26)
+      
+      open(27,file='TbTsRelations/'//trim(argEOS)//
+     1             '_'//trim(argMass)//
+     2             '_'//trim(argComp)//
+     3             '_'//trim(arglogDeltaM)//'.txt')
+      do t_I = 1,t_dimt
+       read(27,*) t_log10tb(t_I)
+       read(27,*) t_log10ts(t_I)
+      end do
+      close(27)
+      
+      t_log10tb0 = t_log10tb(1)
+      t_log10tb1 = t_log10tb(t_dimt)
 
       open(21,file='MuonEmissivityTxts/ma0.00e+00/Bfield.txt')
       open(22,file='MuonEmissivityTxts/ma0.00e+00/Temp.txt')
@@ -358,6 +388,12 @@ c       write(6,*)'Tmax keV',10**h_t1
 c       write(6,*)'pFmin GeV',10**h_p0
 c       write(6,*)'pFmax GeV',10**h_p1
 
+
+c       write(6,*)t_log10tb
+c       write(6,*)t_log10ts
+c       write(6,*)t_log10tb0
+c       write(6,*)t_log10tb1
+
 c      return
 c *********************************************************************
 c *********************************************************************
@@ -397,8 +433,9 @@ c ***  Or define it completely here: **********************************
        folder='Runs/'//trim(argProcess)//'/'//trim(argEOS)//
      1          '_'//trim(argPairing)//'_'//trim(argMass)//
      2          '_'//trim(arglogBinit)//
-     3          '/'//trim(arggann)//'_'//trim(arggapp)//
-     4          '_'//trim(arggaee)//'_'//trim(arggamm)//'/'
+     3          '_'//trim(argComp)//'_'//trim(arglogDeltaM)//
+     4          '/'//trim(arggann)//'_'//trim(arggapp)//
+     5          '_'//trim(arggaee)//'_'//trim(arggamm)//'/'
 
        filename=trim(folder)//'Cool_Try.in'
 
@@ -478,6 +515,15 @@ c *** OUTPUT FILES: ***************************************************
         case (5)
           f_Pairing = 'I_Files/I_Pairing_SFB-c-T73.dat'
       end select
+      
+      select case (CompID)
+        case (0)
+          f_Bound = 'I_Files/I_Bound_Beznogov.dat'
+        case (1)
+          f_Bound = 'I_Files/I_Bound_Beznogov.dat'
+        case (2)
+          f_Bound = 'I_Files/I_Bound_Fe.dat'
+      end select
 
 c**********************************************************************
 c *** PRINT ON THE SCREEN THE FILES:
@@ -507,7 +553,7 @@ c Notice: pscreen will be read from file "I.dat"
        print '(1a28,1a50)','****************************',
      1  '**************************************************'
       end if
-
+      
 c *********************************************************************
 c *****************     READ THE ABOVE FILES     **********************
 c *********************************************************************
@@ -982,24 +1028,31 @@ c *********************************************************************
        lhs=nlum(imax-1)+fk(imax-1)+fj(imax-1)*ntemp(imax)
        ntp=ntemp(imax)
        tp0_keep=ntp
+c       write(6,*)rrho(imax),gs14
 7654   tp0=ntp
        teff0=fteff(tp0/ephi(imax),ifteff,eta,bf_r(imax),istep,
      1             time,ts1,ts2,z_ion(imax),a_ion(imax),rrho(imax),
      2             debug)
        if(debug.eq.-50.) print *,'Tb0, Te0 =',tp0,teff0
+c       print *,'Tb0, Te0 =',tp0,teff0
        tp1=(1.d0+epsilon)*tp0
        teff1=fteff(tp1/ephi(imax),ifteff,eta,bf_r(imax),istep,
      1             time,ts1,ts2,z_ion(imax),a_ion(imax),rrho(imax),
      2             debug)
        if(debug.eq.-50.) print *,'Tb1, Te1 =',tp1,teff1
+c       print *,'Tb1, Te1 =',tp1,teff1
        derivative=coeff*(teff1**4-teff0**4)/(epsilon*tp0)
        derivative=-fj(imax-1)-derivative
        if(debug.eq.-50.) print *,'Derivative =',derivative
+c       print *,'Derivative =',derivative
        function=lhs-fj(imax-1)*tp0-coeff*teff0**4
        if(debug.eq.-50.) print *,'Function =',function
+c       print *,'Function =',function
        ntp=tp0-function/derivative
        if(debug.eq.-50.) print *,'Del(Tp)/Tp =',abs(tp0-ntp)/tp0
+c       print *,'Del(Tp)/Tp =',abs(tp0-ntp)/tp0
        if(debug.eq.-50.) print *,'------> New Tb =',ntp
+c       print *,'------> New Tb =',ntp
        if ((ntp.le.0.).or.(ntp.gt.1.e12)) then ! In case the method diverges
                                  ! restart iterations with shorter time step
         tcut=dsqrt(scale_dt0)
