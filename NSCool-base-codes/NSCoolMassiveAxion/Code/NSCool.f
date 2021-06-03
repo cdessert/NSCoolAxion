@@ -312,6 +312,7 @@ c Process switch
       close(25)
       close(26)
       
+      if (CompID.ne.2) then
       open(27,file='TbTsRelations/'//trim(argEOS)//
      1             '_'//trim(argMass)//
      2             '_'//trim(argComp)//
@@ -321,6 +322,7 @@ c Process switch
        read(27,*) t_log10ts(t_I)
       end do
       close(27)
+      end if
       
       t_log10tb0 = t_log10tb(1)
       t_log10tb1 = t_log10tb(t_dimt)
