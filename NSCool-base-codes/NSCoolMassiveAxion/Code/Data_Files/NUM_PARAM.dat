@@ -1,5 +1,5 @@
 TIME0  TIMEMAX    STEPMAX   ITRIAL_MAX  ITRIAL_OPT   TCUT
-  0.    2.e10     1000       20          12          2.
+  0.    2.e10     400       20          12          2.
 
   DTIME     DTLIMIT   DT0   DT1   REPEAT
  1.E-12     3.15E15  1.20   1.50    0.2

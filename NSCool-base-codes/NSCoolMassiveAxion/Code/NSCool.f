@@ -200,6 +200,7 @@ c Process switch
       character(len=64) :: arggann,arggapp,arggaee,arggamm
       integer :: ProcessID
       integer :: EOSID,PairingID,CompID
+      integer :: iloop_fault
 
       call getarg(1,argProcess)
       call getarg(2,argEOS)
@@ -685,7 +686,7 @@ c *********************************************************************
 c     THIS IS THE MAIN TIME LOOP:
       do 9999 istep=1,istepmax
 c *********************************************************************
-
+        iloop_fault = 0
         debug=0.
         if (istep.ge.istep_debug) debug=debug_keep
         if (debug.ge.1.) print *,'Going: istep=',istep
@@ -1062,7 +1063,14 @@ c       print *,'------> New Tb =',ntp
         dtime=dtime/tcut
         goto 2345
        end if
-       if(abs(tp0-ntp)/tp0.gt.precision)goto 7654
+       if(abs(tp0-ntp)/tp0.gt.precision) then
+        iloop_fault = iloop_fault + 1
+        if(iloop_fault.gt.10000) then
+         write(*,*) "Stuck in loop. Abort!"
+         return
+        endif
+        goto 7654
+       end if
       else
        ntp=tb_acc0            ! Fixed T_b for accretion
       end if
