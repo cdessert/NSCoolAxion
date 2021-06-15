@@ -64,11 +64,11 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 c**** Input/Output:
 
-      character*128 folder
-      character*90 filename
-      character*79 model
-      character*80  f_concryst
-      character*128 f_Bound,f_Pairing,f_Neutrino,f_Conduct,
+      character*256 folder
+      character*256 filename
+      character*256 model
+      character*256  f_concryst
+      character*256 f_Bound,f_Pairing,f_Neutrino,f_Conduct,
      x              f_Heat,f_Bfield,f_Accretion,f_Strange
       dimension tprint(0:50)
       common/print/pcore,model
