@@ -3,7 +3,7 @@ c      File cleaned up on Oct. 10, 2007
 c
 
        function fteff(Tb,ifteff,eta,bfield,istep,time,Ts1,Ts2,
-     1          Z,A,Rho,debug)
+     1          Z,A,Rho,logdeltaM,MNS,debug)
 c WARNING : Tb must be the local value, not the redshifted one !
 c           fteff is also non red-shifted !
 c           Ts1 and Ts2 ARE red-shifted !
@@ -23,10 +23,51 @@ c           Ts1 and Ts2 ARE red-shifted !
          fteff=fteff_ZARho(Tb,Z,A,Rho)
         else if (ifteff.eq.6) then
          fteff=fteff_Beznogov(Tb)
+        else if (ifteff.eq.7) then
+         fteff=fteff_PCY(Tb,logdeltaM,MNS)
         end if
         if (debug.ge.1.) print *,'Done'
       return
        end
+c *********************************************************************
+c *********************************************************************
+
+      function fteff_PCY(Tb,logdeltaM,MNS)
+
+c This is the boundary condition for Fe surface with H/He/C
+c From https://arxiv.org/pdf/astro-ph/9706148.pdf
+c WARNING : Tb must be the local value, not the redshifted one !
+     
+      implicit real*8 (a-h,k-z)
+      common/gravity/gs14,compactness
+      save print
+c*****
+      if (print.eq.1.) goto 10
+       print *,'------------------------------------------'
+       print *,'Using PCY boundary condition'
+       print *,'------------------------------------------'
+       print=1.
+ 10   continue
+c*****
+
+      etaPCY=gs14**2.0d0*10.d0**logdeltaM/MNS
+
+      Tb9=Tb/1.d9
+      Ts=sqrt(7.0d0*Tb9*sqrt(gs14))
+      z=Tb9-Ts/1.d3
+      t4_iron=gs14*((7.0d0*z)**2.25+(z/3.0d0)**1.25)
+      t4_wacc=gs14*(18.1d0*Tb9)**2.42
+      if (etaPCY.gt.1.d-30) then
+       a=(1.2d0+(5.3d-6/etaPCY)**0.38)*Tb9**(5./3.)
+       t4_acc=(a*t4_iron+t4_wacc)/(a+1.0d0)
+      else
+       t4_acc=t4_iron
+      end if
+
+      fteff_PCY=t4_acc**0.25*1.d6
+     
+      end
+      
 c *********************************************************************
 c *********************************************************************
 
