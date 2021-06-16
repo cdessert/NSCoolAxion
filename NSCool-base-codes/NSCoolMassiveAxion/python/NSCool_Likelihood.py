@@ -63,6 +63,9 @@ for iNS,NSname in enumerate(obj_names_short):
     lum_NSCool = data.Teff_Lphots
     B_NSCool = data.Teff_Bfields
     Tcentral_NSCool = data.Teff_Tcentrals
+    last_age = age_NSCool[-1]
+    if last_age < 1.0e6:
+        sys.exit('NSCool stopped before 10^6 years. Last age: {:.2e} years.'.format(last_age))
     TempCoolingCurve = np.interp(age_arr,age_NSCool,temp_NSCool)
     LumCoolingCurve = np.interp(age_arr,age_NSCool,lum_NSCool)
     # Compute the likelihood
@@ -98,6 +101,9 @@ temp_NSCool = data.Teff_Teffs*K2keV
 lum_NSCool = data.Teff_Lphots
 B_NSCool = data.Teff_Bfields
 Tcentral_NSCool = data.Teff_Tcentrals
+last_age = age_NSCool[-1]
+if last_age < 1.0e6:
+    sys.exit('NSCool stopped before 10^6 years. Last age: {:.2e} years.'.format(last_age))
 TempCoolingCurve = np.interp(age_arr,age_NSCool,temp_NSCool)
 LumCoolingCurve = np.interp(age_arr,age_NSCool,lum_NSCool)
 # Compute the likelihood
