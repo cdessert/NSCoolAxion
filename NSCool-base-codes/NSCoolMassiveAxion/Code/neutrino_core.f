@@ -289,8 +289,11 @@ c ***************************
 
       qasync = 0d0
 
+      TGeV = t * 8.61733e-14
+      supr = supr_interp(ma/TGeV)
+
       if (IAND(pid_nn_inner_crust,ProcessID).gt.0) then
-       qasync = qasync + qabrem_nn
+       qasync = qasync + qabrem_nn * supr
       endif       
       if (IAND(pid_nn_inner_crust_super,ProcessID).gt.0) then
        qasync = qasync + qabrem_nn_super
@@ -786,8 +789,10 @@ c      if (pi_on==1) then
 c        write(6,*) "Pion condensate on",qa_picond,g_c,
 c     &   gtilde_A,h_c,Temp_keV,A,kpi
 c        write(6,*)qa_picond,kpi,fmG
-c       end if
+c       end if      
 
+      supr = supr_interp(ma/TGeV)
+      write(*,*),ma,TGeV,supr
 
 c ***************************
       qasync = 0d0
@@ -796,13 +801,13 @@ c ***************************
        qasync = qasync + qasync_o
       endif
       if (IAND(pid_nn_core,ProcessID).gt.0) then
-       qasync = qasync + qabrem_nn 
+       qasync = qasync + qabrem_nn * supr
       endif
       if (IAND(pid_pp_core,ProcessID).gt.0) then
-       qasync = qasync + qabrem_pp
+       qasync = qasync + qabrem_pp * supr
       endif
       if (IAND(pid_np_core,ProcessID).gt.0) then
-       qasync = qasync + qabrem_np
+       qasync = qasync + qabrem_np * supr
       endif
       if (IAND(pid_nn_core_super,ProcessID).gt.0) then
        qasync = qasync + qabrem_nn_super

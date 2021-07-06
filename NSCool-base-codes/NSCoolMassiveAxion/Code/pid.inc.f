@@ -28,7 +28,8 @@
        real*8 :: gapp
        real*8 :: gaee
        real*8 :: gamm
-       common/Couplings/gann,gapp,gaee,gamm
+       real*8 :: ma
+       common/Couplings/gann,gapp,gaee,gamm,ma
 
        real*8,dimension(1:111) :: F_FSA
        common/FormFactors/F_FSA

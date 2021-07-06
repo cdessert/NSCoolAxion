@@ -77,4 +77,28 @@
       end function
 
 
+      function supr_interp(x)
+         Implicit None
+         real*8 :: x,supr_interp
+         integer ind
+         integer,parameter :: p_dimS = 1000
+         real*8,dimension(1:p_dimS) :: supr_maE
+         real*8,dimension(1:p_dimS) :: supr_val
+         common/SUPR/supr_maE,supr_val
+
+         ind = int( (x-supr_maE(1))/(supr_maE(p_dimS)-supr_maE(1)) 
+     &       *p_dimS+1.5 )
+
+         if (ind.lt.1) then
+            supr_interp = 1d0
+         else if( ind.gt.p_dimS ) then
+            supr_interp = 0d0
+         else
+            supr_interp = supr_val(ind) 
+         endif
+
+         return
+      end function
+
+
 

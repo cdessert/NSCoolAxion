@@ -64,11 +64,11 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 c**** Input/Output:
 
-      character*256 folder
-      character*256 filename
-      character*256 model
-      character*256  f_concryst
-      character*256 f_Bound,f_Pairing,f_Neutrino,f_Conduct,
+      character*512 folder
+      character*512 filename
+      character*512 model
+      character*512 f_concryst
+      character*512 f_Bound,f_Pairing,f_Neutrino,f_Conduct,
      x              f_Heat,f_Bfield,f_Accretion,f_Strange
       dimension tprint(0:50)
       common/print/pcore,model
@@ -88,7 +88,7 @@ c     Old stuff: MAY NOT WORK !
 
 c**** Boundary condition:
 
-      character*100 f_TbTs
+      character*512 f_TbTs
       common/bound/tb_acc0,f_TbTs
       common/gravity/gs14,compactness
 
@@ -156,12 +156,12 @@ c F profile
       real*8 :: buf1,buf2
 
 c Tb(Ts) relation
-      integer :: t_I
-      integer,parameter :: t_dimt = 10000
-      real*8,dimension(1:t_dimt) :: t_log10tb
-      real*8,dimension(1:t_dimt) :: t_log10ts
-      real*8 :: t_log10tb0,t_log10tb1
-      common/tbts_tables/t_log10tb,t_log10ts,t_log10tb0,t_log10tb1
+c      integer :: t_I
+c      integer,parameter :: t_dimt = 10000
+c      real*8,dimension(1:t_dimt) :: t_log10tb
+c      real*8,dimension(1:t_dimt) :: t_log10ts
+c      real*8 :: t_log10tb0,t_log10tb1
+c      common/tbts_tables/t_log10tb,t_log10ts,t_log10tb0,t_log10tb1
 
 c      real*8 :: test_emissivity
 c      real*8 :: test_Bfield, test_Temp, test_pfermi
@@ -193,37 +193,44 @@ c PBF I
       common/PBF_I/IA_x,IA_y,IB_x,IB_y
 
 
+      integer,parameter :: p_dimS = 1000
+      real*8,dimension(1:p_dimS) :: supr_maE
+      real*8,dimension(1:p_dimS) :: supr_val
+      common/SUPR/supr_maE,supr_val
+
+
 c Process switch
       character(len=64) :: argProcess
       character(len=64) :: argEOS,argPairing,argMass
-      character(len=64) :: arglogBinit,argComp,arglogDeltaM
-      character(len=64) :: arggann,arggapp,arggaee,arggamm
+c      character(len=64) :: arglogBinit,argComp,arglogDeltaM
+      character(len=64) :: arglogBinit,arglogDeltaM
+      character(len=64) :: arggann,arggapp,arggaee,arggamm,argma
       integer :: ProcessID
       integer :: EOSID,PairingID,CompID
-      integer :: iloop_fault
 
       call getarg(1,argProcess)
       call getarg(2,argEOS)
       call getarg(3,argPairing)
       call getarg(4,argMass)
       call getarg(5,arglogBinit)
-      call getarg(6,argComp)
-      call getarg(7,arglogDeltaM)
-      call getarg(8,arggann)
-      call getarg(9,arggapp)
-      call getarg(10,arggaee)
-      call getarg(11,arggamm)
+      call getarg(6,arglogDeltaM)
+      call getarg(7,arggann)
+      call getarg(8,arggapp)
+      call getarg(9,arggaee)
+      call getarg(10,arggamm)
+      call getarg(11,argma)
       read (argProcess,'(I64)') ProcessID
       read (argEOS,'(I64)') EOSID
       read (argPairing,'(I64)') PairingID
       read (argMass,*) Mass
       read (arglogBinit,*) logBinit
-      read (argComp,'(I64)') CompID
+c      read (argComp,'(I64)') CompID
       read (arglogDeltaM,*) logDeltaM
       read (arggann,*) gann
       read (arggapp,*) gapp
       read (arggaee,*) gaee
       read (arggamm,*) gamm
+      read (argma,*) ma
 
       write(*,*) 'ID:',ProcessID,EOSID,PairingID,CompID
       write(*,*) 'Mass:',Mass
@@ -233,6 +240,7 @@ c Process switch
       write(*,*) 'g_app:',gapp
       write(*,*) 'g_aee:',gaee
       write(*,*) 'g_amm:',gamm
+      write(*,*) 'ma:',ma
 
       write(*,*) '-------------------------------'
       write(*,*) 'The following axion processes will be switched on:'
@@ -313,20 +321,28 @@ c Process switch
       close(25)
       close(26)
       
-      if (CompID.ne.2) then
-      open(27,file='TbTsRelations/'//trim(argEOS)//
-     1             '_'//trim(argMass)//
-     2             '_'//trim(argComp)//
-     3             '_'//trim(arglogDeltaM)//'.txt')
-      do t_I = 1,t_dimt
-       read(27,*) t_log10tb(t_I)
-       read(27,*) t_log10ts(t_I)
+      open(125,file='supr.txt')
+      do p_I = 1,p_dimS
+       read(125,*) supr_maE(p_I)
+       read(125,*) supr_val(p_I)
       end do
-      close(27)
-      end if
+      close(125)
       
-      t_log10tb0 = t_log10tb(1)
-      t_log10tb1 = t_log10tb(t_dimt)
+
+c      if (CompID.ne.2) then
+c      open(27,file='TbTsRelations/'//trim(argEOS)//
+c     1             '_'//trim(argMass)//
+c     2             '_'//trim(argComp)//
+c     3             '_'//trim(arglogDeltaM)//'.txt')
+c      do t_I = 1,t_dimt
+c       read(27,*) t_log10tb(t_I)
+c       read(27,*) t_log10ts(t_I)
+c      end do
+c      close(27)
+c      end if
+      
+c      t_log10tb0 = t_log10tb(1)
+c      t_log10tb1 = t_log10tb(t_dimt)
 
       open(21,file='MuonEmissivityTxts/ma0.00e+00/Bfield.txt')
       open(22,file='MuonEmissivityTxts/ma0.00e+00/Temp.txt')
@@ -436,9 +452,10 @@ c ***  Or define it completely here: **********************************
        folder='Runs/'//trim(argProcess)//'/'//trim(argEOS)//
      1          '_'//trim(argPairing)//'_'//trim(argMass)//
      2          '_'//trim(arglogBinit)//
-     3          '_'//trim(argComp)//'_'//trim(arglogDeltaM)//
+     3          '_'//trim(arglogDeltaM)//
      4          '/'//trim(arggann)//'_'//trim(arggapp)//
-     5          '_'//trim(arggaee)//'_'//trim(arggamm)//'/'
+     5          '_'//trim(arggaee)//'_'//trim(arggamm)//
+     6          '_'//trim(argma)//'/'
 
        filename=trim(folder)//'Cool_Try.in'
 
@@ -519,14 +536,15 @@ c *** OUTPUT FILES: ***************************************************
           f_Pairing = 'I_Files/I_Pairing_SFB-c-T73.dat'
       end select
       
-      select case (CompID)
-        case (0)
-          f_Bound = 'I_Files/I_Bound_Beznogov.dat'
-        case (1)
-          f_Bound = 'I_Files/I_Bound_Beznogov.dat'
-        case (2)
-          f_Bound = 'I_Files/I_Bound_Fe.dat'
-      end select
+c      select case (CompID)
+c        case (0)
+c          f_Bound = 'I_Files/I_Bound_Beznogov.dat'
+c        case (1)
+c          f_Bound = 'I_Files/I_Bound_Beznogov.dat'
+c        case (2)
+c          f_Bound = 'I_Files/I_Bound_Fe.dat'
+c      end select
+      f_Bound = 'I_Files/I_Bound_PCY.dat'
 
 c**********************************************************************
 c *** PRINT ON THE SCREEN THE FILES:
@@ -686,7 +704,7 @@ c *********************************************************************
 c     THIS IS THE MAIN TIME LOOP:
       do 9999 istep=1,istepmax
 c *********************************************************************
-        iloop_fault = 0
+
         debug=0.
         if (istep.ge.istep_debug) debug=debug_keep
         if (debug.ge.1.) print *,'Going: istep=',istep
@@ -1035,13 +1053,15 @@ c       write(6,*)rrho(imax),gs14
 7654   tp0=ntp
        teff0=fteff(tp0/ephi(imax),ifteff,eta,bf_r(imax),istep,
      1             time,ts1,ts2,z_ion(imax),a_ion(imax),rrho(imax),
-     2             debug)
+     2             logdeltaM,Mass,
+     3             debug)
        if(debug.eq.-50.) print *,'Tb0, Te0 =',tp0,teff0
 c       print *,'Tb0, Te0 =',tp0,teff0
        tp1=(1.d0+epsilon)*tp0
        teff1=fteff(tp1/ephi(imax),ifteff,eta,bf_r(imax),istep,
      1             time,ts1,ts2,z_ion(imax),a_ion(imax),rrho(imax),
-     2             debug)
+     2             logdeltaM,Mass,
+     3             debug)
        if(debug.eq.-50.) print *,'Tb1, Te1 =',tp1,teff1
 c       print *,'Tb1, Te1 =',tp1,teff1
        derivative=coeff*(teff1**4-teff0**4)/(epsilon*tp0)
@@ -1063,14 +1083,7 @@ c       print *,'------> New Tb =',ntp
         dtime=dtime/tcut
         goto 2345
        end if
-       if(abs(tp0-ntp)/tp0.gt.precision) then
-        iloop_fault = iloop_fault + 1
-        if(iloop_fault.gt.10000) then
-         write(*,*) "Stuck in loop. Abort!"
-         return
-        endif
-        goto 7654
-       end if
+       if(abs(tp0-ntp)/tp0.gt.precision)goto 7654
       else
        ntp=tb_acc0            ! Fixed T_b for accretion
       end if
