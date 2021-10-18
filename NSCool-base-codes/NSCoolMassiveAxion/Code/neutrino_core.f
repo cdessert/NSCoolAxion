@@ -574,7 +574,7 @@ c all in GeV
 c *************************** PBF
 
 c 1s0 p
-      if(t .lt. tcp(i) .and. i.ge.isf)then
+      if(t .lt. tcp(i) )then
        tau = t/tcp(i)
        Delta_T_s_p = t * sqrt( 1.d0 - tau ) * ( 1.456d0 
      &               - 0.157d0/sqrt(tau) + 1.764/tau ) 
