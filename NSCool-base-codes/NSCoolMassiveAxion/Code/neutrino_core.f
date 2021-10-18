@@ -207,7 +207,10 @@ c *************************** _compute_nucleon_star_factors
 c all in GeV
       fmG=1.973d-1
       m_pi = 0.140d0
-      m_n = 0.939
+      m_n = 0.939565d0
+      m_p = 0.938272d0
+      mn_eff = m_n * mstn(i) 
+      mp_eff = m_p * mstp(i) 
 
       star_kfn_crust = kfn(i) * fmG
 
@@ -216,39 +219,40 @@ c all in GeV
 
       m_x = m_pi / (2.d0*star_kfn_crust) 
       Fx    = 1.d0 - 3.d0/2.d0 * m_x * atan(1.d0/m_x) +
-     &        m_x**2.d0 / 2.d0 / (1.d0+x**2)
+     &        m_x**2.d0 / 2.d0 / (1.d0+m_x**2)
       eann_star_factor = (star_kfn_crust/0.337d0) * Fx/0.607211d0
  
 c *************************** PBF
 
 c 1s0 n
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.ge.isf)then
        tau = t/tcn(i)
        Delta_T_s_n = t * sqrt( 1.d0 - tau ) * ( 1.456d0 
-     &               - 0.157d0/sqrt(tau) + 1.764/tau ) 
+     &               - 0.157d0/sqrt(tau) + 1.764d0/tau ) 
        zn = Delta_T_s_n / t
        Ias_n = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
      &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
-       PBF_s_n_epsilon = 7.01d14 * (gann/1d-10)**2d0
+       PBF_s_n_epsilon = 7.502d14 * (gann/1d-10)**2d0
      &                   * PBF_s_n_star_factor * (t/3d8)**5d0
-     &                   * (1d0/m_n)**2d0 * (Ias_n/2.2d-2)
+     &                   * (1d0/mn_eff) * (Ias_n/2.2d-2)
       else
        PBF_s_n_epsilon = 0d0
       endif
-      
+
+
       if (IAND(pid_negG,ProcessID).gt.0) then
        PBF_s_n_epsilon = -PBF_s_n_epsilon
       endif
 
 c 3p2 A
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.le.isf)then
        tau = t/tcn(i)
-       Delta_T_3p2A = t * sqrt(1d0-tau)*(0.7893d0 + 1.118d0/tau)
+       Delta_T_3p2A = t * sqrt(1d0-tau)*(0.7893d0 + 1.188d0/tau)
        zn = Delta_T_3p2A / t
        IanPA = IpnA_interp(zn)
-       PBF_pA_epsilon = 1.67d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPA/5.96d-3)
+       PBF_pA_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/3d8)**5d0 * (IanPA/2.2d-2) * (mn_eff)
       else
        PBF_pA_epsilon = 0d0
       endif
@@ -258,14 +262,14 @@ c 3p2 A
       endif
 
 c 3p2 B
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.le.isf)then
        tau = t/tcn(i)
        Delta_T_3p2B = t * sqrt(1d0-tau**4d0)/tau
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
        zn = Delta_T_3p2B / t
        IanPB = IpnB_interp(zn)
-       PBF_pB_epsilon = 1.67d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPB/5.96d-3)
+       PBF_pB_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/3d8)**5d0 * (IanPB/2.2e-2) * (mn_eff)
       else
        PBF_pB_epsilon = 0d0
       endif
@@ -289,8 +293,11 @@ c ***************************
 
       qasync = 0d0
 
+      TGeV = t * 8.61733e-14
+      supr = supr_interp(ma/TGeV)
+
       if (IAND(pid_nn_inner_crust,ProcessID).gt.0) then
-       qasync = qasync + qabrem_nn
+       qasync = qasync + qabrem_nn * supr
       endif       
       if (IAND(pid_nn_inner_crust_super,ProcessID).gt.0) then
        qasync = qasync + qabrem_nn_super
@@ -526,7 +533,11 @@ c all in GeV
       h_c = gapp - gann
 
       m_pi = 0.140d0
-      m_n = 0.939d0
+      m_n = 0.939565d0
+      m_p = 0.938272d0
+      mn_eff = m_n * mstn(i) 
+      mp_eff = m_p * mstp(i) 
+
       star_kfn_core = kfn(i) * fmG
       star_kfp_core = kfp(i) * fmG
 
@@ -536,9 +547,9 @@ c all in GeV
       xym = 2.d0 * m_x * m_y /(m_x-m_y)
 
       Fx    = 1.d0 - 3.d0/2.d0 * m_x * atan(1.d0/m_x) +
-     &        m_x**2.d0 / 2.d0 / (1.d0+x**2)
+     &        m_x**2.d0 / 2.d0 / (1.d0+m_x**2)
       Fy    = 1.d0 - 3.d0/2.d0 * m_y * atan(1.d0/m_y) +
-     &        m_y**2.d0 / 2.d0 / (1.d0+y**2)
+     &        m_y**2.d0 / 2.d0 / (1.d0+m_y**2)
       Fxyp  = 1.d0 - 3.d0/2.d0 * xyp * atan(1.d0/xyp) +
      &        m_y**2.d0 / 2.d0 / (1.d0+xyp**2)
       Fxym  = 1.d0 - 3.d0/2.d0 * xym * atan(1.d0/xym) +
@@ -563,7 +574,7 @@ c all in GeV
 c *************************** PBF
 
 c 1s0 p
-      if(t .lt. tcp(i))then
+      if(t .lt. tcp(i) .and. i.ge.isf)then
        tau = t/tcp(i)
        Delta_T_s_p = t * sqrt( 1.d0 - tau ) * ( 1.456d0 
      &               - 0.157d0/sqrt(tau) + 1.764/tau ) 
@@ -571,9 +582,9 @@ c 1s0 p
        Ias_p = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
      &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
-       PBF_s_p_epsilon = 7.01d14 * (gapp/1d-10)**2d0
+       PBF_s_p_epsilon = 7.523d14 * (gapp/1d-10)**2d0
      &                   * PBF_s_p_star_factor * (t/3d8)**5d0
-     &                   * (1d0/mstp(i))**2d0 * (Ias_p/2.2d-2)
+     &                   * (1d0/mp_eff) * (Ias_p/2.2d-2)
       else
        PBF_s_p_epsilon = 0d0
       endif
@@ -582,8 +593,9 @@ c 1s0 p
        PBF_s_p_epsilon = -PBF_s_p_epsilon
       endif
 
+
 c 1s0 n
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.ge.isf)then
        tau = t/tcn(i)
        Delta_T_s_n = t * sqrt( 1.d0 - tau ) * ( 1.456d0 
      &               - 0.157d0/sqrt(tau) + 1.764d0/tau ) 
@@ -591,9 +603,9 @@ c 1s0 n
        Ias_n = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
      &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
-       PBF_s_n_epsilon = 7.01d14 * (gann/1d-10)**2d0
+       PBF_s_n_epsilon = 7.502d14 * (gann/1d-10)**2d0
      &                   * PBF_s_n_star_factor * (t/3d8)**5d0
-     &                   * (1d0/m_n)**2d0 * (Ias_n/2.2d-2)
+     &                   * (1d0/mn_eff) * (Ias_n/2.2d-2)
       else
        PBF_s_n_epsilon = 0d0
       endif
@@ -604,13 +616,13 @@ c 1s0 n
       endif
 
 c 3p2 A
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.le.isf)then
        tau = t/tcn(i)
-       Delta_T_3p2A = t * sqrt(1d0-tau)*(0.7893d0 + 1.118d0/tau)
+       Delta_T_3p2A = t * sqrt(1d0-tau)*(0.7893d0 + 1.188d0/tau)
        zn = Delta_T_3p2A / t
        IanPA = IpnA_interp(zn)
-       PBF_pA_epsilon = 1.67d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPA/5.96d-3)
+       PBF_pA_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/3d8)**5d0 * (IanPA/2.2d-2) * (mn_eff)
       else
        PBF_pA_epsilon = 0d0
       endif
@@ -620,14 +632,14 @@ c 3p2 A
       endif
 
 c 3p2 B
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.le.isf)then
        tau = t/tcn(i)
        Delta_T_3p2B = t * sqrt(1d0-tau**4d0)/tau
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
        zn = Delta_T_3p2B / t
        IanPB = IpnB_interp(zn)
-       PBF_pB_epsilon = 1.67d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPB/5.96d-3)
+       PBF_pB_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/3d8)**5d0 * (IanPB/2.2e-2) * (mn_eff)
       else
        PBF_pB_epsilon = 0d0
       endif
@@ -786,8 +798,10 @@ c      if (pi_on==1) then
 c        write(6,*) "Pion condensate on",qa_picond,g_c,
 c     &   gtilde_A,h_c,Temp_keV,A,kpi
 c        write(6,*)qa_picond,kpi,fmG
-c       end if
+c       end if      
 
+      supr = supr_interp(ma/TGeV)
+c      write(*,*)ma,TGeV,supr
 
 c ***************************
       qasync = 0d0
@@ -796,22 +810,22 @@ c ***************************
        qasync = qasync + qasync_o
       endif
       if (IAND(pid_nn_core,ProcessID).gt.0) then
-       qasync = qasync + qabrem_nn 
+       qasync = qasync + qabrem_nn * supr
       endif
       if (IAND(pid_pp_core,ProcessID).gt.0) then
-       qasync = qasync + qabrem_pp
+       qasync = qasync + qabrem_pp * supr
       endif
       if (IAND(pid_np_core,ProcessID).gt.0) then
-       qasync = qasync + qabrem_np
+       qasync = qasync + qabrem_np * supr
       endif
       if (IAND(pid_nn_core_super,ProcessID).gt.0) then
-       qasync = qasync + qabrem_nn_super
+       qasync = qasync + qabrem_nn_super * supr
       endif
       if (IAND(pid_pp_core_super,ProcessID).gt.0) then
-       qasync = qasync + qabrem_pp_super
+       qasync = qasync + qabrem_pp_super * supr
       endif
       if (IAND(pid_np_core_super,ProcessID).gt.0) then
-       qasync = qasync + qabrem_np_super
+       qasync = qasync + qabrem_np_super * supr
       endif
       if (IAND(pid_PBF_s_p_core,ProcessID).gt.0) then
        qasync = qasync + PBF_s_p_epsilon
@@ -820,7 +834,7 @@ c ***************************
        qasync = qasync + PBF_s_n_epsilon
       endif
       if (IAND(pid_PBF_pA_core,ProcessID).gt.0) then
-       qasync = qasync + PBF_pA_epsilon
+       qasync = qasync + PBF_pA_epsilon 
       endif
       if (IAND(pid_PBF_pB_core,ProcessID).gt.0) then
        qasync = qasync + PBF_pB_epsilon
