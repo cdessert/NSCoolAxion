@@ -83,44 +83,6 @@ for iNS,NSname in enumerate(obj_names_short):
     np.savez(NSCool_res + 'Results30PctSystematicErrors'+NSname+'_Temp.npz',AgeYr=age_arr,TempkeV=TempCoolingCurve,CoolingLikelihood=LL2_evolution_T,\
              MinLikelihood=LL2_min_T,ArgMinLikelihood=LL2_argmin_T,BGauss=B_NSCool,TcentralkeV=Tcentral_NSCool)
     np.savez(NSCool_res + 'Results'+NSname+'_Lum.npz',AgeYr=age_arr,LumErgs=LumCoolingCurve,CoolingLikelihood=LL2_evolution_L,\
-             MinLikelihood=LL2_min_L,ArgMinLikelihood=LL2_argmin_L,BGauss=B_NSCool,TcentralkeV=Tcentral_NSCool)
-    
-# Then just 0720, do the same for top hat prior
-print('Tophat')
-iNS = 2
-NSname = obj_names_short[iNS]
-NS_data_T = np.array([Ages[iNS],Tsurfs[iNS]])
-NS_T_err = np.array([Agerrs[iNS],np.sqrt(Terrs[iNS]**2+(0.3*Tsurfs[iNS])**2)])
-NS_data_L = np.array([Ages[iNS],Lums[iNS]])
-NS_L_err = np.array([Agerrs[iNS],Lerrs[iNS]])
-Bfield_NS = Bfield_dict[NSname]
-# Retrieve NSCool data, so this goes to whatever path you put it in
-data = NSC.NScool(NSCool_res)
-age_NSCool = data.Teff_times
-temp_NSCool = data.Teff_Teffs*K2keV
-lum_NSCool = data.Teff_Lphots
-B_NSCool = data.Teff_Bfields
-Tcentral_NSCool = data.Teff_Tcentrals
-last_age = age_NSCool[-1]
-if last_age < 1.0e6:
-    sys.exit('NSCool stopped before 10^6 years. Last age: {:.2e} years.'.format(last_age))
-TempCoolingCurve = np.interp(age_arr,age_NSCool,temp_NSCool)
-LumCoolingCurve = np.interp(age_arr,age_NSCool,lum_NSCool)
-# Compute the likelihood
-model_evolution_T = np.vstack((age_arr, TempCoolingCurve)).T
-LL2_evolution_T = likelihood_along_evolution_for_0720(NS_data_T,NS_T_err,model_evolution_T)
-model_evolution_L = np.vstack((age_arr, LumCoolingCurve)).T
-LL2_evolution_L = likelihood_along_evolution_for_0720(NS_data_L,NS_L_err,model_evolution_L)
-model_evolution_field_decay_L = np.vstack((age_arr, LumCoolingCurve)).T
-# Store the minimum along the array
-LL2_min_T = np.min(LL2_evolution_T)
-LL2_min_L = np.min(LL2_evolution_L)
-# And also where that minimum is located
-LL2_argmin_T = np.argmin(LL2_evolution_T)
-LL2_argmin_L = np.argmin(LL2_evolution_L)
-    
-    
-np.savez(NSCool_res + 'Results30PctSystematicErrorsTopHatAge'+NSname+'_Temp.npz',AgeYr=age_arr,TempkeV=TempCoolingCurve,CoolingLikelihood=LL2_evolution_T,\
-         MinLikelihood=LL2_min_T,ArgMinLikelihood=LL2_argmin_T,BGauss=B_NSCool,TcentralkeV=Tcentral_NSCool)
-np.savez(NSCool_res + 'ResultsTopHatAge'+NSname+'_Lum.npz',AgeYr=age_arr,LumErgs=LumCoolingCurve,CoolingLikelihood=LL2_evolution_L,\
-         MinLikelihood=LL2_min_L,ArgMinLikelihood=LL2_argmin_L,BGauss=B_NSCool,TcentralkeV=Tcentral_NSCool)
+             MinLikelihood=LL2_min_L,ArgMinLikelihood=LL2_argmin_L,BGauss=B_NSCool,TcentralkeV=Tcentral_NSCool,MinLikelihoodT=LL2_min_T)
+   
+
