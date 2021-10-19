@@ -280,7 +280,7 @@ c 3p2 B
 
 c *************************** _do_nucelon
 c in erg/cm^3/s
-      qabrem_nn = 1.827e12 * eann_star_factor * (t/1.d8)**6d0
+      qabrem_nn = 1.842e12 * eann_star_factor * (t/1.d8)**6d0
      &            * (gann/1d-10)**2d0 * mstn(i)**2d0
       qabrem_nn_super = qabrem_nn * rbrem_nn
 
@@ -558,13 +558,13 @@ c all in GeV
       eann_star_factor = (star_kfn_core/0.337d0) * Fx/0.607211d0
       eapp_star_factor = (star_kfp_core/0.337d0) * Fy/0.607211d0
                 
-      gfacg = 0.5d-1*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+      gfacg = 0.5d0*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0-m_y*atan(1.d0/m_y))
-      gfach = 0.5d-1*Fy+0.5d-1*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+      gfach = 0.5d0*Fy+0.5d0*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0- m_y*atan(1.d0/m_y))
 
-      eanp_star_factor_g = (star_kfn_core/0.337d0) * gfacg
-      eanp_star_factor_h = (star_kfn_core/0.337d0) * gfach
+      eanp_star_factor_g = (star_kfp_core/0.337d0) * gfacg
+      eanp_star_factor_h = (star_kfp_core/0.337d0) * gfach
 
       PBF_s_p_star_factor = (star_kfp_core/0.337d0)**3d0
       PBF_s_n_star_factor = (star_kfn_core/0.337d0)**3d0
@@ -574,7 +574,7 @@ c all in GeV
 c *************************** PBF
 
 c 1s0 p
-      if(t .lt. tcp(i) )then
+      if(t .lt. tcp(i))then
        tau = t/tcp(i)
        Delta_T_s_p = t * sqrt( 1.d0 - tau ) * ( 1.456d0 
      &               - 0.157d0/sqrt(tau) + 1.764/tau ) 
@@ -651,17 +651,20 @@ c 3p2 B
 
 c *************************** _do_nucelon
 c in erg/cm^3/s
-      qabrem_nn = 1.827e12 * eann_star_factor * (t/1.d8)**6d0
+      qabrem_nn = 1.842e12 * eann_star_factor * (t/1.d8)**6d0
      &            * (gann/1d-10)**2d0 * mstn(i)**2d0
-      qabrem_pp = 1.827e12 * eapp_star_factor * (t/1.d8)**6d0
+      qabrem_pp = 1.837e12 * eapp_star_factor * (t/1.d8)**6d0
      &            * (gapp/1d-10)**2d0 * mstp(i)**2d0
-      qabrem_np = 2.008d12 * (eanp_star_factor_h * h_c**2d0 
+      qabrem_np = 2.019d12 * (eanp_star_factor_h * h_c**2d0 
      &            + eanp_star_factor_g * g_c**2d0 )/(1d-10)**2d0
-     &            * (t/1.d8)**6d0 * mstn(i)**2d0 
+     &            * (t/1.d8)**6d0 * mstn(i)*mstp(i) 
 
       qabrem_nn_super = qabrem_nn * rbrem_nn
       qabrem_pp_super = qabrem_pp * rbrem_pp
       qabrem_np_super = qabrem_np * rbrem_np
+
+c      write(*,*)eanp_star_factor_g,eanp_star_factor_h
+c      write(*,*)qabrem_nn_super,qabrem_pp_super,qabrem_np_super
 
       if (IAND(pid_negG,ProcessID).gt.0) then
        qabrem_nn = -qabrem_nn 
