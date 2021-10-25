@@ -177,10 +177,13 @@ c Brem_nn:  n+n -> n+n+2nu
 c **********************************************
       n_nu=3.d0    ! Number of neutrino famillies !
 c Brem_nn:  n+n -> n+n+2nu
-      alpha_nn =0.59d0
-      beta_nn  =0.56d0
-      qbrem_nn=n_nu * 7.4d19 *       mstn(i)**4     * 
-     1         (kfn(i)/1.68d0) * alpha_nn * beta_nn * (t/1.d9)**8
+      beta_nn  = 0.56d0
+      gamma_nn = 0.838d0
+      xn = 0.203578d0 * (1.68d0/kfn(i))
+      Fxn = 1.d0 - 3.d0/2.d0*xn*atan(1.d0/xn) + 0.5d0 * xn**2/(1+xn**2)
+      gamma_fac = 1.d0/(1.d0+1.d0/3.d0*mstn(i)*kfn(i)/1.68d0)
+      qbrem_nn=n_nu * 7.4d19 * mstn(i)**4 * gamma_fac**6 * Fxn * 
+     1         (kfn(i)/1.68d0) * beta_nn * gamma_nn * (t/1.d9)**8
 c **** effect of superfluidity :
       if(t .lt. tcn(i))then
        if (i.ge.isf) then
@@ -280,8 +283,8 @@ c 3p2 B
 
 c *************************** _do_nucelon
 c in erg/cm^3/s
-      qabrem_nn = 1.842e12 * eann_star_factor * (t/1.d8)**6d0
-     &            * (gann/1d-10)**2d0 * mstn(i)**2d0
+      qabrem_nn = 7.565e11 * eann_star_factor * (t/1.d8)**6d0
+     &            * (gann/1d-10)**2d0
       qabrem_nn_super = qabrem_nn * rbrem_nn
 
       if (IAND(pid_negG,ProcessID).gt.0) then
@@ -395,20 +398,32 @@ c ***************************
 c ****** murca : **********************************************
       n_nu=3.d0    ! Number of neutrino famillies !
 c Brem_nn:  n+n -> n+n+2nu
-      alpha_nn =0.59d0
-      beta_nn  =0.56d0
-      qbrem_nn=n_nu * 7.4d19 *       mstn(i)**4     * 
-     1         (kfn(i)/1.68d0) * alpha_nn * beta_nn * (t/1.d9)**8
+      beta_nn  = 0.56d0
+      gamma_nn = 0.838d0
+      xn = 0.203578d0 * (1.68d0/kfn(i))
+      Fxn = 1.d0 - 3.d0/2.d0*xn*atan(1.d0/xn) + 0.5d0 * xn**2/(1+xn**2)
+      gamma_fac = 1.d0/(1.d0+1.d0/3.d0*mstn(i)*kfn(i)/1.68d0)
+      qbrem_nn=n_nu * 7.4d19 *  mstn(i)**4 * gamma_fac**6 * Fxn * 
+     1         (kfn(i)/1.68d0) * beta_nn * gamma_nn * (t/1.d9)**8
 c Brem_np:  n+p -> n+p+2nu
-      alpha_np =1.06d0
-      beta_np  =0.66d0
-      qbrem_np=n_nu * 1.5d20 * mstn(i)**2*mstp(i)**2 * 
-     1         (kfp(i)/1.68d0) * alpha_np * beta_np * (t/1.d9)**8
+      xe = 0.210507d0 * (1.68d0 / kfp(i)) 
+      alphaI = 1.d0 - 3.d0/2.d0*xe*atan(1.d0/xe) + 0.5d0*xe**2/(1+xe**2)
+      alphaII  = ( 1.34689d0*(kfn(i)/1.68d0)**4 -
+     1             0.0289142d0*(kfn(i)/1.68)**2 + 0.0154159d0 )/
+     2           ( (kfn(i)/1.68)**2 + 0.177358d0 )**2
+      alpha_np = alphaI + alphaII
+      beta_np  = 0.66d0
+      gamma_np = 0.838d0
+      qbrem_np=n_nu * 1.5d20 * mstn(i)**2*mstp(i)**2 * gamma_fac**6 * 
+     1         (kfp(i)/1.68d0) * alpha_np*beta_np*gamma_np * (t/1.d9)**8
 c Brem_pp:  p+p -> p+p+2nu
-      alpha_pp=0.11d0
-      beta_pp=0.7d0
-      qbrem_pp=n_nu * 7.4d19 *       mstp(i)**4      * 
-     1         (kfp(i)/1.68d0) * alpha_pp * beta_pp * (t/1.d9)**8
+      beta_pp  = 0.56d0
+      gamma_pp = 0.838d0
+      xp = 0.203578d0 * (1.68d0/kfn(i))
+      Fxp = 1.d0 - 3.d0/2.d0*xp*atan(1.d0/xp) + 0.5d0 * xp**2/(1+xp**2)
+      gamma_fac = 1.d0/(1.d0+1.d0/3.d0*mstp(i)*kfn(i)/1.68d0)
+      qbrem_pp=n_nu * 7.4d19 * mstp(i)**4 * gamma_fac**6 * Fxp * 
+     1         (kfp(i)/1.68d0) * beta_pp * gamma_pp * (t/1.d9)**8
 
    
 c *************************** superfluidity
@@ -558,9 +573,9 @@ c all in GeV
       eann_star_factor = (star_kfn_core/0.337d0) * Fx/0.607211d0
       eapp_star_factor = (star_kfp_core/0.337d0) * Fy/0.607211d0
                 
-      gfacg = 0.5d0*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+      gfacg = 0.5d-1*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0-m_y*atan(1.d0/m_y))
-      gfach = 0.5d0*Fy+0.5d0*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+      gfach = 0.5d-1*Fy+0.5d-1*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0- m_y*atan(1.d0/m_y))
 
       eanp_star_factor_g = (star_kfp_core/0.337d0) * gfacg
@@ -570,6 +585,8 @@ c all in GeV
       PBF_s_n_star_factor = (star_kfn_core/0.337d0)**3d0
       PBF_p_star_factor = (star_kfn_core/0.337d0)
 
+      write(*,*) m_x,m_y,xyp,xym,Fx,Fy,Fxyp,Fxym
+      write(*,*) gfacg,gfach
 
 c *************************** PBF
 
@@ -651,20 +668,20 @@ c 3p2 B
 
 c *************************** _do_nucelon
 c in erg/cm^3/s
-      qabrem_nn = 1.842e12 * eann_star_factor * (t/1.d8)**6d0
-     &            * (gann/1d-10)**2d0 * mstn(i)**2d0
-      qabrem_pp = 1.837e12 * eapp_star_factor * (t/1.d8)**6d0
-     &            * (gapp/1d-10)**2d0 * mstp(i)**2d0
-      qabrem_np = 2.019d12 * (eanp_star_factor_h * h_c**2d0 
+      qabrem_nn = 7.565e11 * eann_star_factor * (t/1.d8)**6d0
+     &            * (gann/1d-10)**2d0 
+      qabrem_pp = 9.431e11 * eapp_star_factor * (t/1.d8)**6d0
+     &            * (gapp/1d-10)**2d0 
+      qabrem_np = 9.776d11 * (eanp_star_factor_h * h_c**2d0 
      &            + eanp_star_factor_g * g_c**2d0 )/(1d-10)**2d0
-     &            * (t/1.d8)**6d0 * mstn(i)*mstp(i) 
+     &            * (t/1.d8)**6d0
 
       qabrem_nn_super = qabrem_nn * rbrem_nn
       qabrem_pp_super = qabrem_pp * rbrem_pp
       qabrem_np_super = qabrem_np * rbrem_np
 
 c      write(*,*)eanp_star_factor_g,eanp_star_factor_h
-c      write(*,*)qabrem_nn_super,qabrem_pp_super,qabrem_np_super
+      write(*,*)qabrem_nn_super,qabrem_pp_super,qabrem_np_super
 
       if (IAND(pid_negG,ProcessID).gt.0) then
        qabrem_nn = -qabrem_nn 
@@ -808,7 +825,8 @@ c      write(*,*)ma,TGeV,supr
 
 c ***************************
       qasync = 0d0
-      
+     
+ 
       if (IAND(pid_synchotron,ProcessID).gt.0) then
        qasync = qasync + qasync_o
       endif
