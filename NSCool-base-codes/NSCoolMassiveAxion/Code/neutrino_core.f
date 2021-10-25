@@ -573,9 +573,9 @@ c all in GeV
       eann_star_factor = (star_kfn_core/0.337d0) * Fx/0.607211d0
       eapp_star_factor = (star_kfp_core/0.337d0) * Fy/0.607211d0
                 
-      gfacg = 0.5d-1*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+      gfacg = 0.5d0*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0-m_y*atan(1.d0/m_y))
-      gfach = 0.5d-1*Fy+0.5d-1*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+      gfach = 0.5d0*Fy+0.5d0*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0- m_y*atan(1.d0/m_y))
 
       eanp_star_factor_g = (star_kfp_core/0.337d0) * gfacg
