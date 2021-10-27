@@ -4,6 +4,7 @@ c *********************************************************************
 c *********************************************************************
 c *********************************************************************
 
+
       subroutine numurca_nucl(i,t,qmurca_nucl)
 
 c **** checked partially on March 30, 1993
@@ -75,21 +76,22 @@ c ******************************
 c Murca_n:  n+n -> n+p+e+nu:
       alpha_n =1.76d0-0.63d0*(1.68d0/kfn(i))**2
       beta_n  =0.68d0
+      gamma_n = 0.838d0
+      gamma_fac = 1d0/(1d0 + 1d0/3d0*rmn*kfn(i)/1.68d0)
       qmurca_n=8.55d21 *rmn**3*rmp   * 
      1         (kfe(i)/1.68d0 + 
      1          kfm(i)/1.68d0) *
-     2         alpha_n * beta_n * (t/1.d9)**8 
+     2         alpha_n * beta_n * (t/1.d9)**8 *
+     3         gamma_n * gamma_fac**6
 c Murca_p:  n+p -> p+p+e+nu:
       alpha_p =alpha_n
       beta_p  =beta_n
-c      qmurca_p=8.55d21 *rmn   *rmp**3* 
-c     1         (kfe(i)/1.68d0 * (1.d0-kfe(i)/4.d0/kfp(i))+
-c     1          kfm(i)/1.68d0 * (1.d0-kfm(i)/4.d0/kfp(i)) ) *
-c     2         alpha_p * beta_p * (t/1.d9)**8
+      gamma_p = 0.838d0
       qmurca_p=8.55d21 *rmn   *rmp**3* 
      1         (kfe(i)/1.68d0) * 
      1         (kfe(i)+3.d0*kfp(i)-kfn(i))**2/(8.d0*kfe(i)*kfp(i)) *    ! From Oleg
-     2         alpha_p * beta_p * (t/1.d9)**8
+     2         alpha_p * beta_p * (t/1.d9)**8 *
+     3         gamma_p * gamma_fac**6
 
 c **** effect of superfluidity :
 
@@ -180,7 +182,7 @@ c Brem_nn:  n+n -> n+n+2nu
       beta_nn  = 0.56d0
       gamma_nn = 0.838d0
       xn = 0.203578d0 * (1.68d0/kfn(i))
-      Fxn = 1.d0 - 3.d0/2.d0*xn*atan(1.d0/xn) + 0.5d0 * xn**2/(1+xn**2)
+      Fxn = funcF(xn)
       gamma_fac = 1.d0/(1.d0+1.d0/3.d0*mstn(i)*kfn(i)/1.68d0)
       qbrem_nn=n_nu * 7.4d19 * mstn(i)**4 * gamma_fac**6 * Fxn * 
      1         (kfn(i)/1.68d0) * beta_nn * gamma_nn * (t/1.d9)**8
@@ -398,16 +400,16 @@ c ***************************
 c ****** murca : **********************************************
       n_nu=3.d0    ! Number of neutrino famillies !
 c Brem_nn:  n+n -> n+n+2nu
+      gamma_fac = 1.d0/(1.d0+1.d0/3.d0*mstn(i)*kfn(i)/1.68d0)
       beta_nn  = 0.56d0
       gamma_nn = 0.838d0
       xn = 0.203578d0 * (1.68d0/kfn(i))
-      Fxn = 1.d0 - 3.d0/2.d0*xn*atan(1.d0/xn) + 0.5d0 * xn**2/(1+xn**2)
-      gamma_fac = 1.d0/(1.d0+1.d0/3.d0*mstn(i)*kfn(i)/1.68d0)
+      Fxn = funcF(xn)
       qbrem_nn=n_nu * 7.4d19 *  mstn(i)**4 * gamma_fac**6 * Fxn * 
      1         (kfn(i)/1.68d0) * beta_nn * gamma_nn * (t/1.d9)**8
 c Brem_np:  n+p -> n+p+2nu
-      xe = 0.210507d0 * (1.68d0 / kfp(i)) 
-      alphaI = 1.d0 - 3.d0/2.d0*xe*atan(1.d0/xe) + 0.5d0*xe**2/(1+xe**2)
+      xe = 0.210507d0 * (1.68d0 / kfe(i)) 
+      alphaI = funcF(xe)
       alphaII  = ( 1.34689d0*(kfn(i)/1.68d0)**4 -
      1             0.0289142d0*(kfn(i)/1.68)**2 + 0.0154159d0 )/
      2           ( (kfn(i)/1.68)**2 + 0.177358d0 )**2
@@ -420,8 +422,7 @@ c Brem_pp:  p+p -> p+p+2nu
       beta_pp  = 0.56d0
       gamma_pp = 0.838d0
       xp = 0.203578d0 * (1.68d0/kfn(i))
-      Fxp = 1.d0 - 3.d0/2.d0*xp*atan(1.d0/xp) + 0.5d0 * xp**2/(1+xp**2)
-      gamma_fac = 1.d0/(1.d0+1.d0/3.d0*mstp(i)*kfn(i)/1.68d0)
+      Fxp = funcF(xp)
       qbrem_pp=n_nu * 7.4d19 * mstp(i)**4 * gamma_fac**6 * Fxp * 
      1         (kfp(i)/1.68d0) * beta_pp * gamma_pp * (t/1.d9)**8
 
@@ -668,13 +669,31 @@ c 3p2 B
 
 c *************************** _do_nucelon
 c in erg/cm^3/s
-      qabrem_nn = 7.565e11 * eann_star_factor * (t/1.d8)**6d0
-     &            * (gann/1d-10)**2d0 
-      qabrem_pp = 9.431e11 * eapp_star_factor * (t/1.d8)**6d0
-     &            * (gapp/1d-10)**2d0 
-      qabrem_np = 9.776d11 * (eanp_star_factor_h * h_c**2d0 
-     &            + eanp_star_factor_g * g_c**2d0 )/(1d-10)**2d0
-     &            * (t/1.d8)**6d0
+      gamma_n = 1d0/( 1d0 + 1d0/3d0*mstn(i)*kfn(i)/1.68d0 )
+      xn = 0.203578 * (1.68d0/kfn(i))
+      Fxn = funcF(xn)
+      qabrem_nn = 7.373d11 * (gann/1d-10)**2 * (kfn(i)/1.68d0) *
+     &            (t/1d8)**6 * (Fxn/0.601566d0) * gamma_n**6
+
+      xp = 0.203578 * (1.68d0/kfp(i))
+      Fxp = funcF(xp)
+      qabrem_pp = 9.191d11 * (gapp/1d-10)**2 * (kfp(i)/1.68d0) *
+     &            (t/1.d8)**6 * (Fxp/0.601556d0) * gamma_n**6
+
+      xn = 0.210507 * (1.68d0/kfn(i))
+      xp = 0.210507 * (1.68d0/kfp(i))
+      Fxp = funcF(xp)
+      Gxp = funcG(xp)
+      Fxnp_m = funcF(2d0*xn*xp/(xn-xp))
+      Fxnp_p = funcF(2d0*xn*xp/(xn+xp))
+      Cg = 0.5d0*funcF(xp) + Gxp +
+     &     (1d0 + xp/xn)*Fxnp_p + (1d0 - xp/xn)*Fxnm_m
+      Ch = 0.5d0*funcF(xp) + Gxp +
+     &     0.5d0*(1d0 + xp/xn)*Fxnp_p + 0.5d0*(1d0 - xp/xn)*Fxnm_m
+      g_c = gapp + gann
+      h_c = gapp - gann
+      qabrem_np = 9.617d11 * (Cg * h_c**2 + Ch * g_c**2 )/(1d-10)**2d0 *
+     &            (kfp(i)/1.68d0) * (t/1.d8)**6 * gamma_n**6
 
       qabrem_nn_super = qabrem_nn * rbrem_nn
       qabrem_pp_super = qabrem_pp * rbrem_pp
@@ -811,7 +830,7 @@ c     &  * 2.2899d34
 c      Andrew's Ratio
       r_pi = 2.0d10 * (h_c**2d0 + g_A**2/3d0*(g_c**2d0+
      1       g_A**2d0*h_c**2d0/4d0)*(k_c/mu_pi)**2d0)*
-     2       (mu_pi/m_n)**-2d0*mstn(i)**-1d0*mstp(i)
+     2       (mu_pi/m_n)**-2d0*mstn(i)**(-1d0)*mstp(i)
       qa_picond = q_picond*r_pi
      
 c      if (pi_on==1) then
