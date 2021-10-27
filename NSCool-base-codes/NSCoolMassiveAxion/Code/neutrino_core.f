@@ -228,6 +228,7 @@ c all in GeV
       eann_star_factor = (star_kfn_crust/0.337d0) * Fx/0.607211d0
  
 c *************************** PBF
+      gamma_n = 1d0/( 1d0 + 1d0/3d0*mstn(i)*kfn(i)/1.68d0 )
 
 c 1s0 n
       if(t .lt. tcn(i) .and. i.ge.isf)then
@@ -240,7 +241,7 @@ c 1s0 n
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
        PBF_s_n_epsilon = 7.502d14 * (gann/1d-10)**2d0
      &                   * PBF_s_n_star_factor * (t/3d8)**5d0
-     &                   * (1d0/mn_eff) * (Ias_n/2.2d-2)
+     &                   * (1d0/mn_eff) * (Ias_n/2.2d-2) * gamma_n**2
       else
        PBF_s_n_epsilon = 0d0
       endif
@@ -257,7 +258,8 @@ c 3p2 A
        zn = Delta_T_3p2A / t
        IanPA = IpnA_interp(zn)
        PBF_pA_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPA/2.2d-2) * (mn_eff)
+     &                * (t/3d8)**5d0 * (IanPA/2.2d-2) * (mn_eff) *
+     &                gamma_n**2
       else
        PBF_pA_epsilon = 0d0
       endif
@@ -274,7 +276,8 @@ c 3p2 B
        zn = Delta_T_3p2B / t
        IanPB = IpnB_interp(zn)
        PBF_pB_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPB/2.2e-2) * (mn_eff)
+     &                * (t/3d8)**5d0 * (IanPB/2.2e-2) * (mn_eff) * 
+     &                gamma_n**2
       else
        PBF_pB_epsilon = 0d0
       endif
@@ -285,8 +288,11 @@ c 3p2 B
 
 c *************************** _do_nucelon
 c in erg/cm^3/s
-      qabrem_nn = 7.565e11 * eann_star_factor * (t/1.d8)**6d0
-     &            * (gann/1d-10)**2d0
+      gamma_n = 1d0/( 1d0 + 1d0/3d0*mstn(i)*kfn(i)/1.68d0 )
+      xn = 0.203578 * (1.68d0/kfn(i))
+      Fxn = funcF(xn)
+      qabrem_nn = 7.373d11 * (gann/1d-10)**2 * (kfn(i)/1.68d0) *
+     &            (t/1d8)**6 * (Fxn/0.601566d0) * gamma_n**6
       qabrem_nn_super = qabrem_nn * rbrem_nn
 
       if (IAND(pid_negG,ProcessID).gt.0) then
@@ -591,6 +597,7 @@ c all in GeV
 
 c *************************** PBF
 
+      gamma_n = 1d0/( 1d0 + 1d0/3d0*mstn(i)*kfn(i)/1.68d0 )
 c 1s0 p
       if(t .lt. tcp(i))then
        tau = t/tcp(i)
@@ -602,7 +609,7 @@ c 1s0 p
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
        PBF_s_p_epsilon = 7.523d14 * (gapp/1d-10)**2d0
      &                   * PBF_s_p_star_factor * (t/3d8)**5d0
-     &                   * (1d0/mp_eff) * (Ias_p/2.2d-2)
+     &                   * (1d0/mp_eff) * (Ias_p/2.2d-2) * gamma_n**2
       else
        PBF_s_p_epsilon = 0d0
       endif
@@ -623,7 +630,7 @@ c 1s0 n
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
        PBF_s_n_epsilon = 7.502d14 * (gann/1d-10)**2d0
      &                   * PBF_s_n_star_factor * (t/3d8)**5d0
-     &                   * (1d0/mn_eff) * (Ias_n/2.2d-2)
+     &                   * (1d0/mn_eff) * (Ias_n/2.2d-2) * gamma_n**2
       else
        PBF_s_n_epsilon = 0d0
       endif
@@ -640,7 +647,8 @@ c 3p2 A
        zn = Delta_T_3p2A / t
        IanPA = IpnA_interp(zn)
        PBF_pA_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPA/2.2d-2) * (mn_eff)
+     &                * (t/3d8)**5d0 * (IanPA/2.2d-2) * (mn_eff) *
+     &                gamma_n**2
       else
        PBF_pA_epsilon = 0d0
       endif
@@ -657,7 +665,8 @@ c 3p2 B
        zn = Delta_T_3p2B / t
        IanPB = IpnB_interp(zn)
        PBF_pB_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPB/2.2e-2) * (mn_eff)
+     &                * (t/3d8)**5d0 * (IanPB/2.2e-2) * (mn_eff) * 
+     &                gamma_n**2
       else
        PBF_pB_epsilon = 0d0
       endif
