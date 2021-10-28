@@ -233,7 +233,8 @@ c *** PBF PROCESSES:
       if (istrange.eq.0) then
 c      Neutrons 1S0:
        if ((inu_n1s0_pbf.eq.1).and.(i.gt.isf)) then
-          call nu_1s0_pbf(t,tcn(i),mstn(i),kfn(i),qpbf_n1s0)
+          call nu_1s0_pbf(t,tcn(i),mstn(i),mstn(i),kfn(i),
+     1                    kfn(i),qpbf_n1s0)
           qpbf_n1s0=qpbf_n1s0*fhad(i)
        else
           qpbf_n1s0=0.0d0
@@ -247,7 +248,8 @@ c      Neutron 3P2:
        end if
 c      Protons:
        if (inu_p_pbf.eq.1) then
-          call nu_1s0_pbf(t,tcp(i),mstp(i),kfp(i),qpbf_p1s0)
+          call nu_1s0_pbf(t,tcp(i),mstp(i),mstn(i),kfp(i),
+     1                    kfn(i),qpbf_p1s0)
           qpbf_p1s0=qpbf_p1s0*fhad(i)
        else
           qpbf_p1s0=0.0d0
