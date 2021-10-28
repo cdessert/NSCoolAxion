@@ -701,7 +701,7 @@ c in erg/cm^3/s
      &     0.5d0*(1d0 + xp/xn)*Fxnp_p + 0.5d0*(1d0 - xp/xn)*Fxnm_m
       g_c = gapp + gann
       h_c = gapp - gann
-      qabrem_np = 9.617d11 * (Cg * h_c**2 + Ch * g_c**2 )/(1d-10)**2d0 *
+      qabrem_np = 9.617d11 * (Cg * g_c**2 + Ch * h_c**2 )/(1d-10)**2d0 *
      &            (kfp(i)/1.68d0) * (t/1.d8)**6 * gamma_n**6
 
       qabrem_nn_super = qabrem_nn * rbrem_nn
@@ -1332,7 +1332,7 @@ c *********************************************************************
 c *********************************************************************
 c *********************************************************************
 c *********************************************************************
-      subroutine nu_1s0_pbf(T,Tc,mst,kf,q_1s0_pbf)
+      subroutine nu_1s0_pbf(T,Tc,mst,mstn,kf,kfn,q_1s0_pbf)
 c     This subroutine uses only the Axial part: good for n & p !
 c     From : Neutrino emission due to proton pairing in neutron stars
 c            Kaminker, A. D.; Haensel, P.; Yakovlev, D. G.
@@ -1352,7 +1352,8 @@ c     2006PhLB..638..114L
 c        The vector part in "a" has been put to zero !
          tau=T/Tc
          u=dsqrt(1.d0-tau)*(1.456d0-0.157d0/dsqrt(tau)+1.764d0/tau)
-         q_1s0_pbf=1.170d21*mst**2*vf*(T/1.d9)**7*3.d0*a*
+         gamma_n = 1d0/(1d0 + 1d0/3d0*mstn*kfn/1.68d0)
+         q_1s0_pbf=1.170d21*mst**2*vf*(T/1.d9)**7*3.d0*a*gamma_n**2*
      1              control_pbf_1S0(u)
         else
          q_1s0_pbf=0.0d0
@@ -1383,9 +1384,12 @@ c     For the j=2 m=0 gap
          a=a_v+a_a
 c        The vector part in "a" has been put to zero !
          tau=T/Tc
-         u=dsqrt(1.d0-tau)*(0.7893d0+1.764d0/tau)
-         q_n3p2_pbf=1.170d21*mst**2*vf*(T/1.d9)**7*3.d0*a*
-     1              control_pbf_3P2_B(u)
+         uB=dsqrt(1.d0-tau)*(0.7893d0+1.764d0/tau)
+         uC=dsqrt(1d0-tau**4d0)/tau
+     &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
+         gamma_n = 1d0/(1d0 + 1d0/3d0*mst*kf/1.68d0)
+         q_n3p2_pbf=1.170d21*mst**2*vf*(T/1.d9)**7*3.d0*a*gamma_n**2*
+     1              (control_pbf_3P2_B(uB) + control_pbf_3P2_C(uC))
         else
          q_n3p2_pbf=0.0d0
         end if
