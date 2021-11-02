@@ -74,24 +74,19 @@ c ******************************
       rmp=mstp(i)
 
 c Murca_n:  n+n -> n+p+e+nu:
-      alpha_n =1.76d0-0.63d0*(1.68d0/kfn(i))**2
-      beta_n  =0.68d0
-      gamma_n = 0.838d0
+      xn = 0.207d0 * (1.68d0/kfn(i))
+      Cfac = -0.157d0
+      alpha_n = 2d0/(1d0+4d0*xn**2)**2 + 2d0*Cfac/(1d0+4d0*xn**2) +
+     1          3d0*Cfac**2
       gamma_fac = 1d0/(1d0 + 1d0/3d0*rmn*kfn(i)/1.68d0)
-      qmurca_n=8.55d21 *rmn**3*rmp   * 
-     1         (kfe(i)/1.68d0 + 
-     1          kfm(i)/1.68d0) *
-     2         alpha_n * beta_n * (t/1.d9)**8 *
-     3         gamma_n * gamma_fac**6
+      qmurca_n=4.88d13 * (kfe(i)/1.68d0 + kfm(i)/1.68d0) *
+     1         alpha_n * (t/1.d8)**8 * gamma_fac**6
+
 c Murca_p:  n+p -> p+p+e+nu:
       alpha_p =alpha_n
-      beta_p  =beta_n
-      gamma_p = 0.838d0
-      qmurca_p=8.55d21 *rmn   *rmp**3* 
-     1         (kfe(i)/1.68d0) * 
+      qmurca_p=4.87d13 * (kfe(i)/1.68d0) * 
      1         (kfe(i)+3.d0*kfp(i)-kfn(i))**2/(8.d0*kfe(i)*kfp(i)) *    ! From Oleg
-     2         alpha_p * beta_p * (t/1.d9)**8 *
-     3         gamma_p * gamma_fac**6
+     2         alpha_p * (t/1.d8)**8 * gamma_fac**6
 
 c **** effect of superfluidity :
 
@@ -179,13 +174,11 @@ c Brem_nn:  n+n -> n+n+2nu
 c **********************************************
       n_nu=3.d0    ! Number of neutrino famillies !
 c Brem_nn:  n+n -> n+n+2nu
-      beta_nn  = 0.56d0
-      gamma_nn = 0.838d0
-      xn = 0.203578d0 * (1.68d0/kfn(i))
+      xn = 0.207d0 * (1.68d0/kfn(i))
       Fxn = funcF(xn)
       gamma_fac = 1.d0/(1.d0+1.d0/3.d0*mstn(i)*kfn(i)/1.68d0)
-      qbrem_nn=n_nu * 7.4d19 * mstn(i)**4 * gamma_fac**6 * Fxn * 
-     1         (kfn(i)/1.68d0) * beta_nn * gamma_nn * (t/1.d9)**8
+      qbrem_nn= 9.18d11 * gamma_fac**6 * Fxn * 
+     1         (kfn(i)/1.68d0) * (t/1d8)**8
 c **** effect of superfluidity :
       if(t .lt. tcn(i))then
        if (i.ge.isf) then
@@ -239,9 +232,9 @@ c 1s0 n
        Ias_n = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
      &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
-       PBF_s_n_epsilon = 7.502d14 * (gann/1d-10)**2d0
-     &                   * PBF_s_n_star_factor * (t/3d8)**5d0
-     &                   * (1d0/mn_eff) * (Ias_n/2.2d-2) * gamma_n**2
+       PBF_s_n_epsilon = 4.692d12 * (gann/1d-10)**2d0
+     &                   * PBF_s_n_star_factor * (t/1d8)**5d0
+     &                   * (mstn(i)) * (Ias_n/2.2d-2) * gamma_n**2
       else
        PBF_s_n_epsilon = 0d0
       endif
@@ -257,8 +250,8 @@ c 3p2 A
        Delta_T_3p2A = t * sqrt(1d0-tau)*(0.7893d0 + 1.188d0/tau)
        zn = Delta_T_3p2A / t
        IanPA = IpnA_interp(zn)
-       PBF_pA_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPA/2.2d-2) * (mn_eff) *
+       PBF_pA_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/1d8)**5d0 * (IanPA/2.2d-2) * (mstn(i)) *
      &                gamma_n**2
       else
        PBF_pA_epsilon = 0d0
@@ -275,8 +268,8 @@ c 3p2 B
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
        zn = Delta_T_3p2B / t
        IanPB = IpnB_interp(zn)
-       PBF_pB_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPB/2.2e-2) * (mn_eff) * 
+       PBF_pB_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/1d8)**5d0 * (IanPB/2.2e-2) * (mstn(i)) * 
      &                gamma_n**2
       else
        PBF_pB_epsilon = 0d0
@@ -289,7 +282,7 @@ c 3p2 B
 c *************************** _do_nucelon
 c in erg/cm^3/s
       gamma_n = 1d0/( 1d0 + 1d0/3d0*mstn(i)*kfn(i)/1.68d0 )
-      xn = 0.203578 * (1.68d0/kfn(i))
+      xn = 0.207 * (1.68d0/kfn(i))
       Fxn = funcF(xn)
       qabrem_nn = 7.373d11 * (gann/1d-10)**2 * (kfn(i)/1.68d0) *
      &            (t/1d8)**6 * (Fxn/0.601566d0) * gamma_n**6
@@ -407,30 +400,24 @@ c ****** murca : **********************************************
       n_nu=3.d0    ! Number of neutrino famillies !
 c Brem_nn:  n+n -> n+n+2nu
       gamma_fac = 1.d0/(1.d0+1.d0/3.d0*mstn(i)*kfn(i)/1.68d0)
-      beta_nn  = 0.56d0
-      gamma_nn = 0.838d0
-      xn = 0.203578d0 * (1.68d0/kfn(i))
+      xn = 0.207d0 * (1.68d0/kfn(i))
+      alpha_n = 2d0/(1d0+4d0*xn**2)**2 + 2d0*Cfac/(1d0+4d0*xn**2) +
+     1          3d0*Cfac**2
       Fxn = funcF(xn)
-      qbrem_nn=n_nu * 7.4d19 *  mstn(i)**4 * gamma_fac**6 * Fxn * 
-     1         (kfn(i)/1.68d0) * beta_nn * gamma_nn * (t/1.d9)**8
+      qbrem_nn= 9.18d11 * gamma_fac**6 * Fxn * (kfn(i)/1.68d0) *
+     1          (t/1.d8)**8
 c Brem_np:  n+p -> n+p+2nu
-      xe = 0.210507d0 * (1.68d0 / kfe(i)) 
-      alphaI = funcF(xe)
-      alphaII  = ( 1.34689d0*(kfn(i)/1.68d0)**4 -
-     1             0.0289142d0*(kfn(i)/1.68)**2 + 0.0154159d0 )/
-     2           ( (kfn(i)/1.68)**2 + 0.177358d0 )**2
-      alpha_np = alphaI + alphaII
-      beta_np  = 0.66d0
-      gamma_np = 0.838d0
-      qbrem_np=n_nu * 1.5d20 * mstn(i)**2*mstp(i)**2 * gamma_fac**6 * 
-     1         (kfp(i)/1.68d0) * alpha_np*beta_np*gamma_np * (t/1.d9)**8
+      xe = 0.207d0 * (1.68d0 / kfe(i)) 
+      Cfac = -0.157d0
+      alpha_np = funcF(xe) + 2d0/(1d0+4d0*xn**2)**2 + 
+     1          4d0*Cfac/(1d0+4d0*xn**2) + 6d0*Cfac**2
+      qbrem_np= 2.16d12 * gamma_fac**6 * 
+     1         (kfp(i)/1.68d0) * alpha_np * (t/1.d8)**8
 c Brem_pp:  p+p -> p+p+2nu
-      beta_pp  = 0.56d0
-      gamma_pp = 0.838d0
-      xp = 0.203578d0 * (1.68d0/kfn(i))
+      xp = 0.207d0 * (1.68d0/kfp(i))
       Fxp = funcF(xp)
-      qbrem_pp=n_nu * 7.4d19 * mstp(i)**4 * gamma_fac**6 * Fxp * 
-     1         (kfp(i)/1.68d0) * beta_pp * gamma_pp * (t/1.d9)**8
+      qbrem_pp= 1.14d12 * gamma_fac**6 * Fxp * 
+     1         (kfp(i)/1.68d0) * (t/1.d8)**8
 
    
 c *************************** superfluidity
@@ -592,8 +579,8 @@ c all in GeV
       PBF_s_n_star_factor = (star_kfn_core/0.337d0)**3d0
       PBF_p_star_factor = (star_kfn_core/0.337d0)
 
-      write(*,*) m_x,m_y,xyp,xym,Fx,Fy,Fxyp,Fxym
-      write(*,*) gfacg,gfach
+c      write(*,*) m_x,m_y,xyp,xym,Fx,Fy,Fxyp,Fxym
+c      write(*,*) gfacg,gfach
 
 c *************************** PBF
 
@@ -607,9 +594,9 @@ c 1s0 p
        Ias_p = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
      &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
-       PBF_s_p_epsilon = 7.523d14 * (gapp/1d-10)**2d0
-     &                   * PBF_s_p_star_factor * (t/3d8)**5d0
-     &                   * (1d0/mp_eff) * (Ias_p/2.2d-2) * gamma_n**2
+       PBF_s_p_epsilon = 4.711e12 * (gapp/1d-10)**2d0
+     &                   * PBF_s_p_star_factor * (t/1d8)**5d0
+     &                   * (1d0/mstp(i)) * (Ias_p/2.2d-2) * gamma_n**2
       else
        PBF_s_p_epsilon = 0d0
       endif
@@ -628,9 +615,9 @@ c 1s0 n
        Ias_n = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
      &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
-       PBF_s_n_epsilon = 7.502d14 * (gann/1d-10)**2d0
-     &                   * PBF_s_n_star_factor * (t/3d8)**5d0
-     &                   * (1d0/mn_eff) * (Ias_n/2.2d-2) * gamma_n**2
+       PBF_s_n_epsilon = 4.692e12 * (gann/1d-10)**2d0
+     &                   * PBF_s_n_star_factor * (t/1d8)**5d0
+     &                   * (1d0/mstn(i)) * (Ias_n/2.2d-2) * gamma_n**2
       else
        PBF_s_n_epsilon = 0d0
       endif
@@ -646,8 +633,8 @@ c 3p2 A
        Delta_T_3p2A = t * sqrt(1d0-tau)*(0.7893d0 + 1.188d0/tau)
        zn = Delta_T_3p2A / t
        IanPA = IpnA_interp(zn)
-       PBF_pA_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPA/2.2d-2) * (mn_eff) *
+       PBF_pA_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/1d8)**5d0 * (IanPA/2.2d-2) * (mstn(i)) *
      &                gamma_n**2
       else
        PBF_pA_epsilon = 0d0
@@ -664,8 +651,8 @@ c 3p2 B
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
        zn = Delta_T_3p2B / t
        IanPB = IpnB_interp(zn)
-       PBF_pB_epsilon = 6.606d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPB/2.2e-2) * (mn_eff) * 
+       PBF_pB_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/1d8)**5d0 * (IanPB/2.2e-2) * (mstn(i)) * 
      &                gamma_n**2
       else
        PBF_pB_epsilon = 0d0
@@ -679,18 +666,16 @@ c 3p2 B
 c *************************** _do_nucelon
 c in erg/cm^3/s
       gamma_n = 1d0/( 1d0 + 1d0/3d0*mstn(i)*kfn(i)/1.68d0 )
-      xn = 0.203578 * (1.68d0/kfn(i))
+      xn = 0.207d0 * (1.68d0/kfn(i))
       Fxn = funcF(xn)
       qabrem_nn = 7.373d11 * (gann/1d-10)**2 * (kfn(i)/1.68d0) *
      &            (t/1d8)**6 * (Fxn/0.601566d0) * gamma_n**6
 
-      xp = 0.203578 * (1.68d0/kfp(i))
+      xp = 0.207d0 * (1.68d0/kfp(i))
       Fxp = funcF(xp)
       qabrem_pp = 9.191d11 * (gapp/1d-10)**2 * (kfp(i)/1.68d0) *
      &            (t/1.d8)**6 * (Fxp/0.601556d0) * gamma_n**6
 
-      xn = 0.210507 * (1.68d0/kfn(i))
-      xp = 0.210507 * (1.68d0/kfp(i))
       Fxp = funcF(xp)
       Gxp = funcG(xp)
       Fxnp_m = funcF(2d0*xn*xp/(xn-xp))
@@ -709,7 +694,7 @@ c in erg/cm^3/s
       qabrem_np_super = qabrem_np * rbrem_np
 
 c      write(*,*)eanp_star_factor_g,eanp_star_factor_h
-      write(*,*)qabrem_nn_super,qabrem_pp_super,qabrem_np_super
+c      write(*,*)qabrem_nn_super,qabrem_pp_super,qabrem_np_super
 
       if (IAND(pid_negG,ProcessID).gt.0) then
        qabrem_nn = -qabrem_nn 
@@ -1353,7 +1338,7 @@ c        The vector part in "a" has been put to zero !
          tau=T/Tc
          u=dsqrt(1.d0-tau)*(1.456d0-0.157d0/dsqrt(tau)+1.764d0/tau)
          gamma_n = 1d0/(1d0 + 1d0/3d0*mstn*kfn/1.68d0)
-         q_1s0_pbf=1.170d21*mst**2*vf*(T/1.d9)**7*3.d0*a*gamma_n**2*
+         q_1s0_pbf=1.24d14*mst**2*vf*(T/1.d8)**7*3.d0*a*gamma_n**2*
      1              control_pbf_1S0(u)
         else
          q_1s0_pbf=0.0d0
@@ -1384,11 +1369,11 @@ c     For the j=2 m=0 gap
          a=a_v+a_a
 c        The vector part in "a" has been put to zero !
          tau=T/Tc
-         uB=dsqrt(1.d0-tau)*(0.7893d0+1.764d0/tau)
+         uB=dsqrt(1.d0-tau)*(0.7893d0+1.188d0/tau)
          uC=dsqrt(1d0-tau**4d0)/tau
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
          gamma_n = 1d0/(1d0 + 1d0/3d0*mst*kf/1.68d0)
-         q_n3p2_pbf=1.170d21*mst**2*vf*(T/1.d9)**7*3.d0*a*gamma_n**2*
+         q_n3p2_pbf=1.24d14*mst**2*vf*(T/1.d8)**7*3.d0*a*gamma_n**2*
      1              (control_pbf_3P2_B(uB) + control_pbf_3P2_C(uC))
         else
          q_n3p2_pbf=0.0d0
