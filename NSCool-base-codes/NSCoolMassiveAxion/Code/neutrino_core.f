@@ -1338,7 +1338,7 @@ c        The vector part in "a" has been put to zero !
          tau=T/Tc
          u=dsqrt(1.d0-tau)*(1.456d0-0.157d0/dsqrt(tau)+1.764d0/tau)
          gamma_n = 1d0/(1d0 + 1d0/3d0*mstn*kfn/1.68d0)
-         q_1s0_pbf=1.24d14*mst**2*vf*(T/1.d8)**7*3.d0*a*gamma_n**2*
+         q_1s0_pbf=1.24d14*mst**2*vf*(T/1.d8)**7*a*gamma_n**2*
      1              control_pbf_1S0(u)
         else
          q_1s0_pbf=0.0d0
@@ -1373,7 +1373,7 @@ c        The vector part in "a" has been put to zero !
          uC=dsqrt(1d0-tau**4d0)/tau
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
          gamma_n = 1d0/(1d0 + 1d0/3d0*mst*kf/1.68d0)
-         q_n3p2_pbf=1.24d14*mst**2*vf*(T/1.d8)**7*3.d0*a*gamma_n**2*
+         q_n3p2_pbf=1.24d14*mst**2*vf*(T/1.d8)**7*a*gamma_n**2*
      1              (control_pbf_3P2_B(uB) + control_pbf_3P2_C(uC))
         else
          q_n3p2_pbf=0.0d0
