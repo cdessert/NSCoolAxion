@@ -212,13 +212,13 @@ c all in GeV
 
       star_kfn_crust = kfn(i) * fmG
 
-      PBF_s_n_star_factor = (star_kfn_crust/0.337d0)**3d0
-      PBF_p_star_factor = (star_kfn_crust/0.337d0)
+      PBF_s_n_star_factor = (kfn(i)/1.68d0)**3d0
+      PBF_p_star_factor = (kfn(i)/1.68d0)
 
       m_x = m_pi / (2.d0*star_kfn_crust) 
       Fx    = 1.d0 - 3.d0/2.d0 * m_x * atan(1.d0/m_x) +
      &        m_x**2.d0 / 2.d0 / (1.d0+m_x**2)
-      eann_star_factor = (star_kfn_crust/0.337d0) * Fx/0.607211d0
+      eann_star_factor = (kfn(i)/1.68d0) * Fx/0.607211d0
  
 c *************************** PBF
       gamma_n = 1d0/( 1d0 + 1d0/3d0*mstn(i)*kfn(i)/1.68d0 )
@@ -234,7 +234,7 @@ c 1s0 n
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
        PBF_s_n_epsilon = 4.692d12 * (gann/1d-10)**2d0
      &                   * PBF_s_n_star_factor * (t/1d8)**5d0
-     &                   * (mstn(i)) * (Ias_n/2.2d-2) * gamma_n**2
+     &                   * (1d0/mstn(i)) * (Ias_n/2.2d-2) * gamma_n**2
       else
        PBF_s_n_epsilon = 0d0
       endif
@@ -564,20 +564,20 @@ c all in GeV
       Fxym  = 1.d0 - 3.d0/2.d0 * xym * atan(1.d0/xym) +
      &        m_y**2.d0 / 2.d0 / (1.d0+xym**2)
 
-      eann_star_factor = (star_kfn_core/0.337d0) * Fx/0.607211d0
-      eapp_star_factor = (star_kfp_core/0.337d0) * Fy/0.607211d0
+      eann_star_factor = (kfn(i)/1.68d0) * Fx/0.607211d0
+      eapp_star_factor = (kfp(i)/1.687d0) * Fy/0.607211d0
                 
       gfacg = 0.5d0*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0-m_y*atan(1.d0/m_y))
       gfach = 0.5d0*Fy+0.5d0*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0- m_y*atan(1.d0/m_y))
 
-      eanp_star_factor_g = (star_kfp_core/0.337d0) * gfacg
-      eanp_star_factor_h = (star_kfp_core/0.337d0) * gfach
+      eanp_star_factor_g = (kfp(i)/1.68d0) * gfacg
+      eanp_star_factor_h = (kfp(i)/1.68d0) * gfach
 
-      PBF_s_p_star_factor = (star_kfp_core/0.337d0)**3d0
-      PBF_s_n_star_factor = (star_kfn_core/0.337d0)**3d0
-      PBF_p_star_factor = (star_kfn_core/0.337d0)
+      PBF_s_p_star_factor = (kfp(i)/1.68d0)**3d0
+      PBF_s_n_star_factor = (kfn(i)/1.68d0)**3d0
+      PBF_p_star_factor = (kfn(i)/1.68d0)
 
 c      write(*,*) m_x,m_y,xyp,xym,Fx,Fy,Fxyp,Fxym
 c      write(*,*) gfacg,gfach
@@ -1338,7 +1338,7 @@ c        The vector part in "a" has been put to zero !
          tau=T/Tc
          u=dsqrt(1.d0-tau)*(1.456d0-0.157d0/dsqrt(tau)+1.764d0/tau)
          gamma_n = 1d0/(1d0 + 1d0/3d0*mstn*kfn/1.68d0)
-         q_1s0_pbf=1.24d14*mst**2*vf*(T/1.d8)**7*a*gamma_n**2*
+         q_1s0_pbf=1.24d14*mst*(kf/1.68d0)*(T/1.d8)**7*a*gamma_n**2*
      1              control_pbf_1S0(u)
         else
          q_1s0_pbf=0.0d0
@@ -1373,7 +1373,7 @@ c        The vector part in "a" has been put to zero !
          uC=dsqrt(1d0-tau**4d0)/tau
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
          gamma_n = 1d0/(1d0 + 1d0/3d0*mst*kf/1.68d0)
-         q_n3p2_pbf=1.24d14*mst**2*vf*(T/1.d8)**7*a*gamma_n**2*
+         q_n3p2_pbf=1.24d14*mst*(kf/1.68d0)*(T/1.d8)**7*a*gamma_n**2*
      1              (control_pbf_3P2_B(uB) + control_pbf_3P2_C(uC))
         else
          q_n3p2_pbf=0.0d0
