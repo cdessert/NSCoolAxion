@@ -64,11 +64,19 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 c**** Input/Output:
 
+<<<<<<< HEAD
       character*512 folder
       character*512 filename
       character*512 model
       character*512 f_concryst
       character*512 f_Bound,f_Pairing,f_Neutrino,f_Conduct,
+=======
+      character*128 folder
+      character*90 filename
+      character*79 model
+      character*80  f_concryst
+      character*128 f_Bound,f_Pairing,f_Neutrino,f_Conduct,
+>>>>>>> refs/remotes/origin/main
      x              f_Heat,f_Bfield,f_Accretion,f_Strange
       dimension tprint(0:50)
       common/print/pcore,model
@@ -205,7 +213,11 @@ c Process switch
       character(len=64) :: argEOS,argPairing,argMass
 c      character(len=64) :: arglogBinit,argComp,arglogDeltaM
       character(len=64) :: arglogBinit,arglogDeltaM
+<<<<<<< HEAD
       character(len=64) :: arggann,arggapp,arggaee,arggamm,argma
+=======
+      character(len=64) :: arggann,arggapp,arggaee,arggamm
+>>>>>>> refs/remotes/origin/main
       integer :: ProcessID
       integer :: EOSID,PairingID,CompID
 
@@ -219,7 +231,10 @@ c      character(len=64) :: arglogBinit,argComp,arglogDeltaM
       call getarg(8,arggapp)
       call getarg(9,arggaee)
       call getarg(10,arggamm)
+<<<<<<< HEAD
       call getarg(11,argma)
+=======
+>>>>>>> refs/remotes/origin/main
       read (argProcess,'(I64)') ProcessID
       read (argEOS,'(I64)') EOSID
       read (argPairing,'(I64)') PairingID
@@ -322,6 +337,7 @@ c      read (argComp,'(I64)') CompID
       close(25)
       close(26)
       
+<<<<<<< HEAD
       open(125,file='supr.txt')
       do p_I = 1,p_dimS
        read(125,*) supr_maE(p_I)
@@ -342,6 +358,20 @@ c      end do
 c      close(27)
 c      end if
       
+=======
+c      if (CompID.ne.2) then
+c      open(27,file='TbTsRelations/'//trim(argEOS)//
+c     1             '_'//trim(argMass)//
+c     2             '_'//trim(argComp)//
+c     3             '_'//trim(arglogDeltaM)//'.txt')
+c      do t_I = 1,t_dimt
+c       read(27,*) t_log10tb(t_I)
+c       read(27,*) t_log10ts(t_I)
+c      end do
+c      close(27)
+c      end if
+      
+>>>>>>> refs/remotes/origin/main
 c      t_log10tb0 = t_log10tb(1)
 c      t_log10tb1 = t_log10tb(t_dimt)
 
