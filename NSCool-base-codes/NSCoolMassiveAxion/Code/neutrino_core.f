@@ -268,16 +268,9 @@ c 3p2 B
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
        zn = Delta_T_3p2B / t
        IanPB = IpnB_interp(zn)
-<<<<<<< HEAD
-c       PBF_pB_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
-c     &                * (t/1d8)**5d0 * (IanPB/2.2e-2) * (mstn(i)) * 
-c     &                gamma_n**2
-       PBF_pB_epsilon = 0d0
-=======
        PBF_pB_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
      &                * (t/1d8)**5d0 * (IanPB/2.2e-2) * (mstn(i)) * 
      &                gamma_n**2
->>>>>>> refs/remotes/origin/main
       else
        PBF_pB_epsilon = 0d0
       endif
@@ -658,16 +651,9 @@ c 3p2 B
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
        zn = Delta_T_3p2B / t
        IanPB = IpnB_interp(zn)
-<<<<<<< HEAD
-c       PBF_pB_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
-c     &                * (t/1d8)**5d0 * (IanPB/2.2e-2) * (mstn(i)) * 
-c     &                gamma_n**2
-       PBF_pB_epsilon = 0d0
-=======
        PBF_pB_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
      &                * (t/1d8)**5d0 * (IanPB/2.2e-2) * (mstn(i)) * 
      &                gamma_n**2
->>>>>>> refs/remotes/origin/main
       else
        PBF_pB_epsilon = 0d0
       endif
@@ -1388,12 +1374,8 @@ c        The vector part in "a" has been put to zero !
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
          gamma_n = 1d0/(1d0 + 1d0/3d0*mst*kf/1.68d0)
          q_n3p2_pbf=1.24d14*mst*(kf/1.68d0)*(T/1.d8)**7*a*gamma_n**2*
-<<<<<<< HEAD
      1              (control_pbf_3P2_B(uB))
 c     1              (control_pbf_3P2_B(uB) + control_pbf_3P2_C(uC))
-=======
-     1              (control_pbf_3P2_B(uB) + control_pbf_3P2_C(uC))
->>>>>>> refs/remotes/origin/main
         else
          q_n3p2_pbf=0.0d0
         end if
