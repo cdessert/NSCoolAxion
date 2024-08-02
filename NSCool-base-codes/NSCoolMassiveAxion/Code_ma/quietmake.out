@@ -1,0 +1,23 @@
+gfortran -g -fno-backslash -O3 -c NSCool.f
+gfortran -g -fno-backslash -O3 -c precool.f
+gfortran -g -fno-backslash -O3 -c emissivity.f
+gfortran -g -fno-backslash -O3 -c conductivity.f
+gfortran -g -fno-backslash -O3 -c conductivity_core.f
+gfortran -g -fno-backslash -O3 -c conductivity_crust.f
+gfortran -g -fno-backslash -O3 -c opacity.f
+gfortran -g -fno-backslash -O3 -c neutrino.f
+gfortran -g -fno-backslash -O3 -c neutrino_core.f
+gfortran -g -fno-backslash -O3 -c neutrino_crust.f
+gfortran -g -fno-backslash -O3 -c heating.f
+gfortran -g -fno-backslash -O3 -c spec_heat.f
+gfortran -g -fno-backslash -O3 -c density.f
+gfortran -g -fno-backslash -O3 -c boundary.f
+gfortran -g -fno-backslash -O3 -c tc.f
+gfortran -g -fno-backslash -O3 -c tc_Ioffe.f
+gfortran -g -fno-backslash -O3 -c eff_mass.f
+gfortran -g -fno-backslash -O3 -c rotation.f
+gfortran -g -fno-backslash -O3 -c accretion.f
+gfortran -g -fno-backslash -O3 -c magnetic.f
+gfortran -g -fno-backslash -O3 -c Tools.f
+gfortran -g -fno-backslash -O3 -o NSCool.out NSCool.o precool.o emissivity.o conductivity.o conductivity_core.o conductivity_crust.o opacity.o neutrino.o neutrino_core.o neutrino_crust.o heating.o spec_heat.o density.o boundary.o tc.o tc_Ioffe.o eff_mass.o rotation.o accretion.o magnetic.o Tools.o 
+cp NSCool.out ..

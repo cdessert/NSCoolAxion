@@ -1,0 +1,2 @@
+grep 'f_heat_deep' accretion.inc.f control_con.inc.f control_nu.inc.f control_heat.inc.f fermi.inc.f files.inc.f gamma_limits.inc.f mag_field.inc.f pairing.inc.f pairing_quark_PU2002.inc.f profile_comp.inc.f profile_star.inc.f quark.inc.f rho_limits.inc.f size.inc.f spec_heat.inc.f
+
