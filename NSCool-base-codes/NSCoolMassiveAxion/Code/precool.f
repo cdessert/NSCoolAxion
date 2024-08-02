@@ -1301,6 +1301,11 @@ c *********************************************************************
 c       INCLUDE 'files_phys.inc.f'
        INCLUDE 'files.inc.f'
        dimension tcrit(10),rho_lo(10),rho_hi(10)
+       integer,parameter :: p_kfd = 1000
+       real*8,dimension(1:p_kfd) :: kfInt
+       real*8,dimension(1:p_kfd) :: DeltaInt 
+       integer kfind,p_I
+
 c Just to be safe:
        do i=0,imax
         tcn(i) =1.0d0
@@ -1435,9 +1440,23 @@ c     Minimal Cooling paper gaps:
        else if(sfn3p2.eq.150.) then
         ! Nothing to do: parameters were read from I_Pairing*.dat file
        end if
+
+       open(unit=20,file='SCGF.txt')
+       do p_I = 1,p_kfd
+        read(20,*) kfInt(p_I)
+        read(20,*) DeltaInt(p_I)
+       end do
+       close(20)
+
        do i=0,idrip
-        temp=tcmax_n3p2*
+        if(sfn3p2.eq.104.) then      ! new Gap model SCGF
+         kfind=int(kfn(i)/10d0*p_kfd)
+         temp=max(1.d0,DeltaInt(kfind) * 1.16d10 / 0.8416d0)
+c         write(*,*) i,kfind,kfn(i),temp,DeltaInt(kfind)
+        else
+         temp=tcmax_n3p2*
      1       exp(-(kfn(i)-kfmax_n3p2)**2/delkf_n3p2**2)*fn3p2
+        end if
         if (temp.ge.tcn(i)) then
          tcn(i)=temp
          if (isf.eq.i-1) isf=i

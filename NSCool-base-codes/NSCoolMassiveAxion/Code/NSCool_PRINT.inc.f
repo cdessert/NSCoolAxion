@@ -98,6 +98,8 @@ c*********************************************************************
        if (pteff.eq.1.0) then
         write(19,601) istep,(time+dtime)/year,teffective,
      1               lum(imax-1)*lsol,lnu*lsol,lh*lsol,Bcurr,tcenter
+        write(*,*) 'res: ',(time+dtime)/year,lum(imax-1),lnu
+ 
  601    format(i8,1p1e12.3,5x,1p4e12.3,1p4e12.3,1p4e12.3)
 c*********************************************************************
        else

@@ -791,10 +791,10 @@ c**********************************************************************
 
       qsynch=9.04e14*b13**2*(t/1.e9)**5*s_ab*s_bc
 
-      WRITE(*,*) 't=',t 
-      WRITE(*,*) 'bfield=',bfield 
-      WRITE(*,*) 'kfe=',kfe 
-      WRITE(*,*) 'qsynch=',qsynch 
+c      WRITE(*,*) 't=',t 
+c      WRITE(*,*) 'bfield=',bfield 
+c      WRITE(*,*) 'kfe=',kfe 
+c      WRITE(*,*) 'qsynch=',qsynch 
 
       return
 

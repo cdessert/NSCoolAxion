@@ -106,6 +106,7 @@ C***** Local variable used only in the main program
       dimension lambda(0:isize),lambda1(0:isize)
       dimension kappa(0:isize),kappa1(0:isize)
       dimension qnu(0:isize),qnu1(0:isize)
+      dimension qatot(0:isize),qatot1(1:isize)
       dimension qqq(0:isize),qqq1(0:isize)
       dimension qeebrem(0:isize),
      1          qnpb(0:isize),qplasma(0:isize),qsynch(0:isize),
@@ -449,7 +450,7 @@ c ***  Can add here the directory where "Cool_*.in" is:
 c       filename='Model_1/'//filename
 c ***  Or define it completely here: **********************************
 
-       folder='Runs/'//trim(argProcess)//'/'//trim(argEOS)//
+       folder='tmp/'//trim(argProcess)//'/'//trim(argEOS)//
      1          '_'//trim(argPairing)//'_'//trim(argMass)//
      2          '_'//trim(arglogBinit)//
      3          '_'//trim(arglogDeltaM)//
@@ -534,6 +535,8 @@ c *** OUTPUT FILES: ***************************************************
           f_Pairing = 'I_Files/I_Pairing_SFB-b-T73.dat'
         case (5)
           f_Pairing = 'I_Files/I_Pairing_SFB-c-T73.dat'
+        case (6)
+          f_Pairing = 'I_Files/I_Pairing_SFB-SCGF-T73.dat'
       end select
       
 c      select case (CompID)
@@ -796,15 +799,19 @@ c     Chris: Magnetic Field Evolution
 c     Calculate dBdt at this time step
 c     dtime is in seconds, see line 421 above, so dtime/year in years
 c     dBdt is in Gauss/s
-      tcenter=ntemp(1)/ephi(1)
-      if (istep==1) then
-        Bcurr=10**logBinit
-        dlogBdt=-1/(1.8d9/0.1)-1/(3d9*(tcenter/1d8)**2/(Bcurr/1d12)**2)
-        dBdt=Bcurr*dLogBdt
-      else
-        dlogBdt=-1/(1.8d9/0.1)-1/(3d9*(tcenter/1d8)**2/(Bcurr/1d12)**2)
-        dBdt=Bcurr*dLogBdt
-      end if
+c      tcenter=ntemp(1)/ephi(1)
+c      if (istep==1) then
+c        Bcurr=10**logBinit
+c        dlogBdt=-1/(1.8d9/0.1)-1/(3d9*(tcenter/1d8)**2/(Bcurr/1d12)**2)
+c        dBdt=Bcurr*dLogBdt
+c      else
+c        dlogBdt=-1/(1.8d9/0.1)-1/(3d9*(tcenter/1d8)**2/(Bcurr/1d12)**2)
+c        dBdt=Bcurr*dLogBdt
+c      end if
+
+
+      Bcurr=10**logBinit
+c      write(*,*) Bcurr,dBdt,dlogBdt,dLogBdt
 
 c BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 c      INCLUDE 'Bfield/Bfield_3.inc.f'
@@ -850,6 +857,7 @@ c ***** Calculate the new density in inner envelope at ntemp **********
 c *********************************************************************
 
       if (debug.ge.1.) print *,'Calculating new density at NTemp'
+
       do i=imax-1,ienv+1,-2
        x=(dlog(rrho(i+1))-dlog(rrho(i)))/
      1   (dlog(rrho(i+1))-dlog(rrho(i-1)))
@@ -882,7 +890,7 @@ c *********************************************************************
        a=a_cell(i)
        a1=a_ion(i)
        z=z_ion(i)
-       call neutrino(i,t,ProcessID,time,d,a,z,qnu(i),
+       call neutrino(i,t,ProcessID,time,d,a,z,qnu(i),qatot(i),
      1   qeebrem(i),qnpb(i),qplasma(i),qsynch(i),qbubble(i),
      1   qpair(i),qphoto(i),qbrem_nn(i),
 c     2   qmurca_nucl(i),qbrem_nucl(i),qasync(i),qmurca_hyp(i),qbrem_hyp(i),
@@ -954,7 +962,7 @@ c *********************************************************************
        a1=a_ion(i)
        z=z_ion(i)
 
-       call neutrino(i,t,ProcessID,time,d,a,z,qnu1(i),
+       call neutrino(i,t,ProcessID,time,d,a,z,qnu1(i),qatot1(i),
      1          qn00,qn01,qn02,qn03,qn04,qn05,qn06,qn07,qn08,qn09,q10,
      2               qn11,qn12,qn13,qn14,qn15,qn16,qn17,qn18,qn19,q20,
      3               qn21,qn22,qn23,
@@ -1318,7 +1326,7 @@ c *********************************************************************
 
 c     Chris: Magnetic Field Evolution
 c     Update the magnetic field strength for next time step
-      Bcurr=Bcurr+dBdt*dtime/year
+c      Bcurr=Bcurr+dBdt*dtime/year
 c      write(6,*)istep,Bcurr,dBdt,dtime,tcenter
 
 c BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
@@ -1383,17 +1391,21 @@ c ***** Calculate the neutrino luminosity and heating: ****************
 c *********************************************************************
        if (debug.ge.1.) print *,
      1     'Calculating Total Neutrino Luminosity and Heating'
+       la  =0.d0
        lnu =0.d0
        lnu0=0.d0
        lh  =0.d0
        lh0 =0.d0
        do i=1,imax,2
         lnu =lnu +e2phi(i)* qnu(i)*(dvol(i)+dvol(i+1))
+        la  =la  +e2phi(i)*qatot(i)*(dvol(i)+dvol(i+1))
         lnu0=lnu0+ephi(i) * qnu(i)*(dvol(i)+dvol(i+1))   ! without energy red-shift
         lh  =lh  +e2phi(i)*heat(i)*(dvol(i)+dvol(i+1))
         lh0 =lh0 +ephi(i) *heat(i)*(dvol(i)+dvol(i+1))   ! without energy red-shift
        end do
        lnu=lnu/lsol
+       la=la/lsol
+       write(*,*) 'preres:', lnu,la
        lh =lh/lsol
        htot=htot+lh*dtime
 
@@ -1402,6 +1414,7 @@ c     Note: lnu_tot, calculated from qnu(i), is the garanteed total
 c     neutrino luminosity. The other ones are only informative.
       lmurca_nucl=0.0d0
       lbrem_nucl =0.0d0
+      lbrem_nn   =0.0d0
       lplasma    =0.0d0
       lnpb       =0.0d0
       lpbf_n1S0  =0.0d0
@@ -1411,12 +1424,14 @@ c     neutrino luminosity. The other ones are only informative.
        e2p=e2phi(i)
        lmurca_nucl=lmurca_nucl+qmurca_nucl(i)*(dvol(i)+dvol(i+1))*e2p
        lbrem_nucl =lbrem_nucl +qbrem_nucl(i) *(dvol(i)+dvol(i+1))*e2p
+       lbrem_nn   =lbrem_nn   +qbrem_nn(i)   *(dvol(i)+dvol(i+1))*e2p
        lplasma    =lplasma    +qplasma(i)    *(dvol(i)+dvol(i+1))*e2p
        lnpb       =lnpb       +qnpb(i)       *(dvol(i)+dvol(i+1))*e2p
        lpbf_n1S0  =lpbf_n1S0  +qpbf_n1S0(i)  *(dvol(i)+dvol(i+1))*e2p
        lpbf_n3P2  =lpbf_n3P2  +qpbf_n3P2(i)  *(dvol(i)+dvol(i+1))*e2p
        lpbf_p1S0  =lpbf_p1S0  +qpbf_p1S0(i)  *(dvol(i)+dvol(i+1))*e2p
       end do
+      write(*,*) 's0ratesnu',lbrem_nucl_lbream_nn,lpbf_n1s0,lpbf_p1s0
 
 c ***** CALCULATE THE INTEGRATED SPECIFIC HEATS: **********************
 c     cv_tot_all, calculated from cv(i), is the garanteed total

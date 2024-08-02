@@ -100,5 +100,19 @@
          return
       end function
 
+      function funcF(x)
+         Implicit None
+         real*8 :: x,funcF
+         funcF = 1d0 - 3d0/2d0*x*atan(1d0/x) + 0.5d0*x**2/(1d0+x**2)
+         return
+      end function
+
+      function funcG(x)
+         Implicit None
+         real*8 :: x,funcG
+         funcG = 1d0 - x*atan(1d0/x) 
+         return
+      end function
+
 
 

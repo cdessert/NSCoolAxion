@@ -85,7 +85,21 @@ c***** Magnetic field decay a la GOLDREICH-REISENNEGGER
 c***** Chris: Magnetic Field Evolution
 c      The heat gets *-1 already, so this should be positive value
 c      To heat the NS. dBdt is negative.
-       heat_constant_field_evol=-2.52171d-9*Bcurr*dBdt
+c         Bthis = Bcurr * exp( -time/year / 1.d6)
+c         dBdt =  - Bthis / 1.d6
+       if (rrho(i).lt.rhocore) then
+         tohm = 1.d6
+         thall = 1.d3 * 1.d15/Bcurr
+         timey = time/year
+         Bthis = Bcurr * exp(-timey/tohm) / 
+     1           (1.d0+tohm/thall * (1.d0-exp(-timey/tohm)))
+         dBdt = Bthis / ( exp(-timey/tohm)*tohm**2/(thall+tohm) - tohm )
+         heat_constant_field_evol=-2.52171d-9 *Bthis*dBdt
+       else
+         heat_constant_field_evol=0d0
+       end if
+
+c       write(*,*) time, Bthis, dBdt, heat_constant_field_evol
 c*****
         heat=
      1       heat_deep_crust+

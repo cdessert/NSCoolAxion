@@ -4,6 +4,7 @@ c *********************************************************************
 c *********************************************************************
 c *********************************************************************
 
+
       subroutine numurca_nucl(i,t,qmurca_nucl)
 
 c **** checked partially on March 30, 1993
@@ -73,23 +74,19 @@ c ******************************
       rmp=mstp(i)
 
 c Murca_n:  n+n -> n+p+e+nu:
-      alpha_n =1.76d0-0.63d0*(1.68d0/kfn(i))**2
-      beta_n  =0.68d0
-      qmurca_n=8.55d21 *rmn**3*rmp   * 
-     1         (kfe(i)/1.68d0 + 
-     1          kfm(i)/1.68d0) *
-     2         alpha_n * beta_n * (t/1.d9)**8 
+      xn = 0.207d0 * (1.68d0/kfn(i))
+      Cfac = -0.157d0
+      alpha_n = 2d0/(1d0+4d0*xn**2)**2 + 2d0*Cfac/(1d0+4d0*xn**2) +
+     1          3d0*Cfac**2
+      gamma_fac = 1d0/(1d0 + 1d0/3d0*rmn*kfn(i)/1.68d0)
+      qmurca_n=4.88d13 * (kfe(i)/1.68d0 + kfm(i)/1.68d0) *
+     1         alpha_n * (t/1.d8)**8 * gamma_fac**6
+
 c Murca_p:  n+p -> p+p+e+nu:
       alpha_p =alpha_n
-      beta_p  =beta_n
-c      qmurca_p=8.55d21 *rmn   *rmp**3* 
-c     1         (kfe(i)/1.68d0 * (1.d0-kfe(i)/4.d0/kfp(i))+
-c     1          kfm(i)/1.68d0 * (1.d0-kfm(i)/4.d0/kfp(i)) ) *
-c     2         alpha_p * beta_p * (t/1.d9)**8
-      qmurca_p=8.55d21 *rmn   *rmp**3* 
-     1         (kfe(i)/1.68d0) * 
+      qmurca_p=4.87d13 * (kfe(i)/1.68d0) * 
      1         (kfe(i)+3.d0*kfp(i)-kfn(i))**2/(8.d0*kfe(i)*kfp(i)) *    ! From Oleg
-     2         alpha_p * beta_p * (t/1.d9)**8
+     2         alpha_p * (t/1.d8)**8 * gamma_fac**6
 
 c **** effect of superfluidity :
 
@@ -177,10 +174,11 @@ c Brem_nn:  n+n -> n+n+2nu
 c **********************************************
       n_nu=3.d0    ! Number of neutrino famillies !
 c Brem_nn:  n+n -> n+n+2nu
-      alpha_nn =0.59d0
-      beta_nn  =0.56d0
-      qbrem_nn=n_nu * 7.4d19 *       mstn(i)**4     * 
-     1         (kfn(i)/1.68d0) * alpha_nn * beta_nn * (t/1.d9)**8
+      xn = 0.207d0 * (1.68d0/kfn(i))
+      Fxn = funcF(xn)
+      gamma_fac = 1.d0/(1.d0+1.d0/3.d0*mstn(i)*kfn(i)/1.68d0)
+      qbrem_nn= 9.18d11 * gamma_fac**6 * Fxn * 
+     1         (kfn(i)/1.68d0) * (t/1d8)**8
 c **** effect of superfluidity :
       if(t .lt. tcn(i))then
        if (i.ge.isf) then
@@ -207,48 +205,54 @@ c *************************** _compute_nucleon_star_factors
 c all in GeV
       fmG=1.973d-1
       m_pi = 0.140d0
-      m_n = 0.939
+      m_n = 0.939565d0
+      m_p = 0.938272d0
+      mn_eff = m_n * mstn(i) 
+      mp_eff = m_p * mstp(i) 
 
       star_kfn_crust = kfn(i) * fmG
 
-      PBF_s_n_star_factor = (star_kfn_crust/0.337d0)**3d0
-      PBF_p_star_factor = (star_kfn_crust/0.337d0)
+      PBF_s_n_star_factor = (kfn(i)/1.68d0)**3d0
+      PBF_p_star_factor = (kfn(i)/1.68d0)
 
       m_x = m_pi / (2.d0*star_kfn_crust) 
       Fx    = 1.d0 - 3.d0/2.d0 * m_x * atan(1.d0/m_x) +
-     &        m_x**2.d0 / 2.d0 / (1.d0+x**2)
-      eann_star_factor = (star_kfn_crust/0.337d0) * Fx/0.607211d0
+     &        m_x**2.d0 / 2.d0 / (1.d0+m_x**2)
+      eann_star_factor = (kfn(i)/1.68d0) * Fx/0.607211d0
  
 c *************************** PBF
+      gamma_n = 1d0/( 1d0 + 1d0/3d0*mstn(i)*kfn(i)/1.68d0 )
 
 c 1s0 n
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.ge.isf)then
        tau = t/tcn(i)
        Delta_T_s_n = t * sqrt( 1.d0 - tau ) * ( 1.456d0 
-     &               - 0.157d0/sqrt(tau) + 1.764/tau ) 
+     &               - 0.157d0/sqrt(tau) + 1.764d0/tau ) 
        zn = Delta_T_s_n / t
        Ias_n = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
      &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
-       PBF_s_n_epsilon = 7.01d14 * (gann/1d-10)**2d0
-     &                   * PBF_s_n_star_factor * (t/3d8)**5d0
-     &                   * (1d0/m_n)**2d0 * (Ias_n/2.2d-2)
+       PBF_s_n_epsilon = 4.692d12 * (gann/1d-10)**2d0
+     &                   * PBF_s_n_star_factor * (t/1d8)**5d0
+     &                   * (1d0/mstn(i)) * (Ias_n/2.2d-2) * gamma_n**2
       else
        PBF_s_n_epsilon = 0d0
       endif
-      
+
+
       if (IAND(pid_negG,ProcessID).gt.0) then
        PBF_s_n_epsilon = -PBF_s_n_epsilon
       endif
 
 c 3p2 A
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.le.isf)then
        tau = t/tcn(i)
-       Delta_T_3p2A = t * sqrt(1d0-tau)*(0.7893d0 + 1.118d0/tau)
+       Delta_T_3p2A = t * sqrt(1d0-tau)*(0.7893d0 + 1.188d0/tau)
        zn = Delta_T_3p2A / t
        IanPA = IpnA_interp(zn)
-       PBF_pA_epsilon = 1.67d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPA/5.96d-3)
+       PBF_pA_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/1d8)**5d0 * (IanPA/2.2d-2) * (mstn(i)) *
+     &                gamma_n**2
       else
        PBF_pA_epsilon = 0d0
       endif
@@ -258,14 +262,16 @@ c 3p2 A
       endif
 
 c 3p2 B
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.le.isf)then
        tau = t/tcn(i)
        Delta_T_3p2B = t * sqrt(1d0-tau**4d0)/tau
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
        zn = Delta_T_3p2B / t
        IanPB = IpnB_interp(zn)
-       PBF_pB_epsilon = 1.67d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPB/5.96d-3)
+c       PBF_pB_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
+c     &                * (t/1d8)**5d0 * (IanPB/2.2e-2) * (mstn(i)) * 
+c     &                gamma_n**2
+       PBF_pB_epsilon = 0d0
       else
        PBF_pB_epsilon = 0d0
       endif
@@ -276,8 +282,11 @@ c 3p2 B
 
 c *************************** _do_nucelon
 c in erg/cm^3/s
-      qabrem_nn = 1.827e12 * eann_star_factor * (t/1.d8)**6d0
-     &            * (gann/1d-10)**2d0 * mstn(i)**2d0
+      gamma_n = 1d0/( 1d0 + 1d0/3d0*mstn(i)*kfn(i)/1.68d0 )
+      xn = 0.207 * (1.68d0/kfn(i))
+      Fxn = funcF(xn)
+      qabrem_nn = 7.373d11 * (gann/1d-10)**2 * (kfn(i)/1.68d0) *
+     &            (t/1d8)**6 * (Fxn/0.601566d0) * gamma_n**6
       qabrem_nn_super = qabrem_nn * rbrem_nn
 
       if (IAND(pid_negG,ProcessID).gt.0) then
@@ -391,20 +400,25 @@ c ***************************
 c ****** murca : **********************************************
       n_nu=3.d0    ! Number of neutrino famillies !
 c Brem_nn:  n+n -> n+n+2nu
-      alpha_nn =0.59d0
-      beta_nn  =0.56d0
-      qbrem_nn=n_nu * 7.4d19 *       mstn(i)**4     * 
-     1         (kfn(i)/1.68d0) * alpha_nn * beta_nn * (t/1.d9)**8
+      gamma_fac = 1.d0/(1.d0+1.d0/3.d0*mstn(i)*kfn(i)/1.68d0)
+      xn = 0.207d0 * (1.68d0/kfn(i))
+      alpha_n = 2d0/(1d0+4d0*xn**2)**2 + 2d0*Cfac/(1d0+4d0*xn**2) +
+     1          3d0*Cfac**2
+      Fxn = funcF(xn)
+      qbrem_nn= 9.18d11 * gamma_fac**6 * Fxn * (kfn(i)/1.68d0) *
+     1          (t/1.d8)**8
 c Brem_np:  n+p -> n+p+2nu
-      alpha_np =1.06d0
-      beta_np  =0.66d0
-      qbrem_np=n_nu * 1.5d20 * mstn(i)**2*mstp(i)**2 * 
-     1         (kfp(i)/1.68d0) * alpha_np * beta_np * (t/1.d9)**8
+      xe = 0.207d0 * (1.68d0 / kfe(i)) 
+      Cfac = -0.157d0
+      alpha_np = funcF(xe) + 2d0/(1d0+4d0*xn**2)**2 + 
+     1          4d0*Cfac/(1d0+4d0*xn**2) + 6d0*Cfac**2
+      qbrem_np= 2.16d12 * gamma_fac**6 * 
+     1         (kfp(i)/1.68d0) * alpha_np * (t/1.d8)**8
 c Brem_pp:  p+p -> p+p+2nu
-      alpha_pp=0.11d0
-      beta_pp=0.7d0
-      qbrem_pp=n_nu * 7.4d19 *       mstp(i)**4      * 
-     1         (kfp(i)/1.68d0) * alpha_pp * beta_pp * (t/1.d9)**8
+      xp = 0.207d0 * (1.68d0/kfp(i))
+      Fxp = funcF(xp)
+      qbrem_pp= 1.14d12 * gamma_fac**6 * Fxp * 
+     1         (kfp(i)/1.68d0) * (t/1.d8)**8
 
    
 c *************************** superfluidity
@@ -529,7 +543,11 @@ c all in GeV
       h_c = gapp - gann
 
       m_pi = 0.140d0
-      m_n = 0.939d0
+      m_n = 0.939565d0
+      m_p = 0.938272d0
+      mn_eff = m_n * mstn(i) 
+      mp_eff = m_p * mstp(i) 
+
       star_kfn_core = kfn(i) * fmG
       star_kfp_core = kfp(i) * fmG
 
@@ -539,32 +557,35 @@ c all in GeV
       xym = 2.d0 * m_x * m_y /(m_x-m_y)
 
       Fx    = 1.d0 - 3.d0/2.d0 * m_x * atan(1.d0/m_x) +
-     &        m_x**2.d0 / 2.d0 / (1.d0+x**2)
+     &        m_x**2.d0 / 2.d0 / (1.d0+m_x**2)
       Fy    = 1.d0 - 3.d0/2.d0 * m_y * atan(1.d0/m_y) +
-     &        m_y**2.d0 / 2.d0 / (1.d0+y**2)
+     &        m_y**2.d0 / 2.d0 / (1.d0+m_y**2)
       Fxyp  = 1.d0 - 3.d0/2.d0 * xyp * atan(1.d0/xyp) +
      &        m_y**2.d0 / 2.d0 / (1.d0+xyp**2)
       Fxym  = 1.d0 - 3.d0/2.d0 * xym * atan(1.d0/xym) +
      &        m_y**2.d0 / 2.d0 / (1.d0+xym**2)
 
-      eann_star_factor = (star_kfn_core/0.337d0) * Fx/0.607211d0
-      eapp_star_factor = (star_kfp_core/0.337d0) * Fy/0.607211d0
+      eann_star_factor = (kfn(i)/1.68d0) * Fx/0.607211d0
+      eapp_star_factor = (kfp(i)/1.687d0) * Fy/0.607211d0
                 
-      gfacg = 0.5d-1*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+      gfacg = 0.5d0*Fy+       ( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0-m_y*atan(1.d0/m_y))
-      gfach = 0.5d-1*Fy+0.5d-1*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
+      gfach = 0.5d0*Fy+0.5d0*( (Fxyp + Fxym) +m_y/m_x*(Fxyp-Fxym) )
      &     + (1.d0- m_y*atan(1.d0/m_y))
 
-      eanp_star_factor_g = (star_kfn_core/0.337d0) * gfacg
-      eanp_star_factor_h = (star_kfn_core/0.337d0) * gfach
+      eanp_star_factor_g = (kfp(i)/1.68d0) * gfacg
+      eanp_star_factor_h = (kfp(i)/1.68d0) * gfach
 
-      PBF_s_p_star_factor = (star_kfp_core/0.337d0)**3d0
-      PBF_s_n_star_factor = (star_kfn_core/0.337d0)**3d0
-      PBF_p_star_factor = (star_kfn_core/0.337d0)
+      PBF_s_p_star_factor = (kfp(i)/1.68d0)**3d0
+      PBF_s_n_star_factor = (kfn(i)/1.68d0)**3d0
+      PBF_p_star_factor = (kfn(i)/1.68d0)
 
+c      write(*,*) m_x,m_y,xyp,xym,Fx,Fy,Fxyp,Fxym
+c      write(*,*) gfacg,gfach
 
 c *************************** PBF
 
+      gamma_n = 1d0/( 1d0 + 1d0/3d0*mstn(i)*kfn(i)/1.68d0 )
 c 1s0 p
       if(t .lt. tcp(i))then
        tau = t/tcp(i)
@@ -574,9 +595,9 @@ c 1s0 p
        Ias_p = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
      &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
-       PBF_s_p_epsilon = 7.01d14 * (gapp/1d-10)**2d0
-     &                   * PBF_s_p_star_factor * (t/3d8)**5d0
-     &                   * (1d0/mstp(i))**2d0 * (Ias_p/2.2d-2)
+       PBF_s_p_epsilon = 4.711e12 * (gapp/1d-10)**2d0
+     &                   * PBF_s_p_star_factor * (t/1d8)**5d0
+     &                   * (1d0/mstp(i)) * (Ias_p/2.2d-2) * gamma_n**2
       else
        PBF_s_p_epsilon = 0d0
       endif
@@ -585,8 +606,9 @@ c 1s0 p
        PBF_s_p_epsilon = -PBF_s_p_epsilon
       endif
 
+
 c 1s0 n
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.ge.isf)then
        tau = t/tcn(i)
        Delta_T_s_n = t * sqrt( 1.d0 - tau ) * ( 1.456d0 
      &               - 0.157d0/sqrt(tau) + 1.764d0/tau ) 
@@ -594,9 +616,9 @@ c 1s0 n
        Ias_n = (0.158151d0*zn**2d0+0.543166d0*zn**4d0)
      &          *sqrt(1d0+pi*zn/4.d0/0.543166d0**2d0)
      &          *exp(0.0535359d0-sqrt(4d0*zn**2d0+0.0535359d0**2d0))
-       PBF_s_n_epsilon = 7.01d14 * (gann/1d-10)**2d0
-     &                   * PBF_s_n_star_factor * (t/3d8)**5d0
-     &                   * (1d0/m_n)**2d0 * (Ias_n/2.2d-2)
+       PBF_s_n_epsilon = 4.692e12 * (gann/1d-10)**2d0
+     &                   * PBF_s_n_star_factor * (t/1d8)**5d0
+     &                   * (1d0/mstn(i)) * (Ias_n/2.2d-2) * gamma_n**2
       else
        PBF_s_n_epsilon = 0d0
       endif
@@ -607,13 +629,14 @@ c 1s0 n
       endif
 
 c 3p2 A
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.le.isf)then
        tau = t/tcn(i)
-       Delta_T_3p2A = t * sqrt(1d0-tau)*(0.7893d0 + 1.118d0/tau)
+       Delta_T_3p2A = t * sqrt(1d0-tau)*(0.7893d0 + 1.188d0/tau)
        zn = Delta_T_3p2A / t
        IanPA = IpnA_interp(zn)
-       PBF_pA_epsilon = 1.67d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPA/5.96d-3)
+       PBF_pA_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
+     &                * (t/1d8)**5d0 * (IanPA/2.2d-2) * (mstn(i)) *
+     &                gamma_n**2
       else
        PBF_pA_epsilon = 0d0
       endif
@@ -623,14 +646,16 @@ c 3p2 A
       endif
 
 c 3p2 B
-      if(t .lt. tcn(i))then
+      if(t .lt. tcn(i) .and. i.le.isf)then
        tau = t/tcn(i)
        Delta_T_3p2B = t * sqrt(1d0-tau**4d0)/tau
      &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
        zn = Delta_T_3p2B / t
        IanPB = IpnB_interp(zn)
-       PBF_pB_epsilon = 1.67d15 * (gann/1d-10)**2d0 * PBF_p_star_factor
-     &                * (t/3d8)**5d0 * (IanPB/5.96d-3)
+c       PBF_pB_epsilon = 3.769d13 * (gann/1d-10)**2d0 * PBF_p_star_factor
+c     &                * (t/1d8)**5d0 * (IanPB/2.2e-2) * (mstn(i)) * 
+c     &                gamma_n**2
+       PBF_pB_epsilon = 0d0
       else
        PBF_pB_epsilon = 0d0
       endif
@@ -642,17 +667,36 @@ c 3p2 B
 
 c *************************** _do_nucelon
 c in erg/cm^3/s
-      qabrem_nn = 1.827e12 * eann_star_factor * (t/1.d8)**6d0
-     &            * (gann/1d-10)**2d0 * mstn(i)**2d0
-      qabrem_pp = 1.827e12 * eapp_star_factor * (t/1.d8)**6d0
-     &            * (gapp/1d-10)**2d0 * mstp(i)**2d0
-      qabrem_np = 2.008d12 * (eanp_star_factor_h * h_c**2d0 
-     &            + eanp_star_factor_g * g_c**2d0 )/(1d-10)**2d0
-     &            * (t/1.d8)**6d0 * mstn(i)**2d0 
+      gamma_n = 1d0/( 1d0 + 1d0/3d0*mstn(i)*kfn(i)/1.68d0 )
+      xn = 0.207d0 * (1.68d0/kfn(i))
+      Fxn = funcF(xn)
+      qabrem_nn = 7.373d11 * (gann/1d-10)**2 * (kfn(i)/1.68d0) *
+     &            (t/1d8)**6 * (Fxn/0.601566d0) * gamma_n**6
+
+      xp = 0.207d0 * (1.68d0/kfp(i))
+      Fxp = funcF(xp)
+      qabrem_pp = 9.191d11 * (gapp/1d-10)**2 * (kfp(i)/1.68d0) *
+     &            (t/1.d8)**6 * (Fxp/0.601556d0) * gamma_n**6
+
+      Fxp = funcF(xp)
+      Gxp = funcG(xp)
+      Fxnp_m = funcF(2d0*xn*xp/(xn-xp))
+      Fxnp_p = funcF(2d0*xn*xp/(xn+xp))
+      Cg = 0.5d0*funcF(xp) + Gxp +
+     &     (1d0 + xp/xn)*Fxnp_p + (1d0 - xp/xn)*Fxnm_m
+      Ch = 0.5d0*funcF(xp) + Gxp +
+     &     0.5d0*(1d0 + xp/xn)*Fxnp_p + 0.5d0*(1d0 - xp/xn)*Fxnm_m
+      g_c = gapp + gann
+      h_c = gapp - gann
+      qabrem_np = 9.617d11 * (Cg * g_c**2 + Ch * h_c**2 )/(1d-10)**2d0 *
+     &            (kfp(i)/1.68d0) * (t/1.d8)**6 * gamma_n**6
 
       qabrem_nn_super = qabrem_nn * rbrem_nn
       qabrem_pp_super = qabrem_pp * rbrem_pp
       qabrem_np_super = qabrem_np * rbrem_np
+
+c      write(*,*)eanp_star_factor_g,eanp_star_factor_h
+c      write(*,*)qabrem_nn_super,qabrem_pp_super,qabrem_np_super
 
       if (IAND(pid_negG,ProcessID).gt.0) then
        qabrem_nn = -qabrem_nn 
@@ -782,7 +826,7 @@ c     &  * 2.2899d34
 c      Andrew's Ratio
       r_pi = 2.0d10 * (h_c**2d0 + g_A**2/3d0*(g_c**2d0+
      1       g_A**2d0*h_c**2d0/4d0)*(k_c/mu_pi)**2d0)*
-     2       (mu_pi/m_n)**-2d0*mstn(i)**-1d0*mstp(i)
+     2       (mu_pi/m_n)**-2d0*mstn(i)**(-1d0)*mstp(i)
       qa_picond = q_picond*r_pi
      
 c      if (pi_on==1) then
@@ -792,11 +836,12 @@ c        write(6,*)qa_picond,kpi,fmG
 c       end if      
 
       supr = supr_interp(ma/TGeV)
-      write(*,*),ma,TGeV,supr
+c      write(*,*)ma,TGeV,supr
 
 c ***************************
       qasync = 0d0
-      
+     
+ 
       if (IAND(pid_synchotron,ProcessID).gt.0) then
        qasync = qasync + qasync_o
       endif
@@ -810,13 +855,13 @@ c ***************************
        qasync = qasync + qabrem_np * supr
       endif
       if (IAND(pid_nn_core_super,ProcessID).gt.0) then
-       qasync = qasync + qabrem_nn_super
+       qasync = qasync + qabrem_nn_super * supr
       endif
       if (IAND(pid_pp_core_super,ProcessID).gt.0) then
-       qasync = qasync + qabrem_pp_super
+       qasync = qasync + qabrem_pp_super * supr
       endif
       if (IAND(pid_np_core_super,ProcessID).gt.0) then
-       qasync = qasync + qabrem_np_super
+       qasync = qasync + qabrem_np_super * supr
       endif
       if (IAND(pid_PBF_s_p_core,ProcessID).gt.0) then
        qasync = qasync + PBF_s_p_epsilon
@@ -825,7 +870,7 @@ c ***************************
        qasync = qasync + PBF_s_n_epsilon
       endif
       if (IAND(pid_PBF_pA_core,ProcessID).gt.0) then
-       qasync = qasync + PBF_pA_epsilon
+       qasync = qasync + PBF_pA_epsilon 
       endif
       if (IAND(pid_PBF_pB_core,ProcessID).gt.0) then
        qasync = qasync + PBF_pB_epsilon
@@ -1274,7 +1319,7 @@ c *********************************************************************
 c *********************************************************************
 c *********************************************************************
 c *********************************************************************
-      subroutine nu_1s0_pbf(T,Tc,mst,kf,q_1s0_pbf)
+      subroutine nu_1s0_pbf(T,Tc,mst,mstn,kf,kfn,q_1s0_pbf)
 c     This subroutine uses only the Axial part: good for n & p !
 c     From : Neutrino emission due to proton pairing in neutron stars
 c            Kaminker, A. D.; Haensel, P.; Yakovlev, D. G.
@@ -1294,7 +1339,8 @@ c     2006PhLB..638..114L
 c        The vector part in "a" has been put to zero !
          tau=T/Tc
          u=dsqrt(1.d0-tau)*(1.456d0-0.157d0/dsqrt(tau)+1.764d0/tau)
-         q_1s0_pbf=1.170d21*mst**2*vf*(T/1.d9)**7*3.d0*a*
+         gamma_n = 1d0/(1d0 + 1d0/3d0*mstn*kfn/1.68d0)
+         q_1s0_pbf=1.24d14*mst*(kf/1.68d0)*(T/1.d8)**7*a*gamma_n**2*
      1              control_pbf_1S0(u)
         else
          q_1s0_pbf=0.0d0
@@ -1325,9 +1371,13 @@ c     For the j=2 m=0 gap
          a=a_v+a_a
 c        The vector part in "a" has been put to zero !
          tau=T/Tc
-         u=dsqrt(1.d0-tau)*(0.7893d0+1.764d0/tau)
-         q_n3p2_pbf=1.170d21*mst**2*vf*(T/1.d9)**7*3.d0*a*
-     1              control_pbf_3P2_B(u)
+         uB=dsqrt(1.d0-tau)*(0.7893d0+1.188d0/tau)
+         uC=dsqrt(1d0-tau**4d0)/tau
+     &              *( 2.03d0 - 0.4903d0*tau**4d0 + 0.1727d0*tau**8d0 )
+         gamma_n = 1d0/(1d0 + 1d0/3d0*mst*kf/1.68d0)
+         q_n3p2_pbf=1.24d14*mst*(kf/1.68d0)*(T/1.d8)**7*a*gamma_n**2*
+     1              (control_pbf_3P2_B(uB))
+c     1              (control_pbf_3P2_B(uB) + control_pbf_3P2_C(uC))
         else
          q_n3p2_pbf=0.0d0
         end if
