@@ -450,7 +450,7 @@ c ***  Can add here the directory where "Cool_*.in" is:
 c       filename='Model_1/'//filename
 c ***  Or define it completely here: **********************************
 
-       folder='tmp/'//trim(argProcess)//'/'//trim(argEOS)//
+       folder='/tmp/'//trim(argProcess)//'/'//trim(argEOS)//
      1          '_'//trim(argPairing)//'_'//trim(argMass)//
      2          '_'//trim(arglogBinit)//
      3          '_'//trim(arglogDeltaM)//
